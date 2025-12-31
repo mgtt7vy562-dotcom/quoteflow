@@ -64,6 +64,10 @@ export default function QuoteHistory() {
     });
   };
 
+  const handleScheduleJob = (quoteId) => {
+    window.location.href = `/ScheduleJob?quoteId=${quoteId}`;
+  };
+
   const statusColors = {
     draft: 'bg-slate-100 text-slate-700',
     sent: 'bg-blue-100 text-blue-700',
@@ -179,8 +183,18 @@ export default function QuoteHistory() {
                         className="bg-emerald-500 hover:bg-emerald-600"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Download PDF
+                        PDF
                       </Button>
+                      {quote.status === 'accepted' && !quote.job_id && (
+                        <Button
+                          onClick={() => handleScheduleJob(quote.id)}
+                          variant="outline"
+                          className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Schedule
+                        </Button>
+                      )}
                     </div>
                   </div>
 

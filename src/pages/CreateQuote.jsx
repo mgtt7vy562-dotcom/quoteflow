@@ -12,14 +12,20 @@ import {
   FileText, 
   Loader2,
   Download,
-  Send
+  Send,
+  Mail,
+  MessageSquare,
+  PenTool
 } from 'lucide-react';
 import QuotePDFGenerator from '../components/quote/QuotePDFGenerator';
+import SignaturePad from '../components/quote/SignaturePad';
 
 export default function CreateQuote() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [sending, setSending] = useState(false);
   
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -30,7 +36,8 @@ export default function CreateQuote() {
     items_description: '',
     base_price: '',
     fees: [],
-    notes: ''
+    notes: '',
+    signature_url: ''
   });
 
   useEffect(() => {
@@ -99,7 +106,7 @@ export default function CreateQuote() {
         quote_number: quoteNumber,
         base_price: parseFloat(formData.base_price) || 0,
         total: total,
-        status: 'draft'
+        status: formData.signature_url ? 'accepted' : 'draft'
       };
 
       const savedQuote = await base44.entities.Quote.create(quoteData);
@@ -117,6 +124,71 @@ export default function CreateQuote() {
     } catch (err) {
       alert('Error saving quote');
       setSaving(false);
+    }
+  };
+
+  const handleSendQuote = async (method) => {
+    if (!formData.customer_email && !formData.customer_phone) {
+      alert('Please add customer email or phone to send quote');
+      return;
+    }
+
+    setSending(true);
+    try {
+      const total = calculateTotal();
+      const quoteNumber = generateQuoteNumber();
+      
+      const quoteData = {
+        ...formData,
+        quote_number: quoteNumber,
+        base_price: parseFloat(formData.base_price) || 0,
+        total: total,
+        status: 'sent'
+      };
+
+      const savedQuote = await base44.entities.Quote.create(quoteData);
+
+      const message = `Hi ${formData.customer_name}! Here's your quote from ${user.company_name}:
+
+Quote #${quoteNumber}
+Total: $${total.toFixed(2)}
+Items: ${formData.items_description}
+
+${formData.notes ? `Notes: ${formData.notes}` : ''}
+
+Reply to accept this quote!`;
+
+      if (method === 'email' && formData.customer_email) {
+        await base44.integrations.Core.SendEmail({
+          to: formData.customer_email,
+          subject: `Quote #${quoteNumber} from ${user.company_name}`,
+          body: message
+        });
+        alert('Quote sent via email!');
+      } else if (method === 'sms' && formData.customer_phone) {
+        alert(`SMS sending ready! Send this to ${formData.customer_phone}:\n\n${message}`);
+      }
+
+      window.location.href = '/QuoteHistory';
+    } catch (err) {
+      alert('Error sending quote');
+      setSending(false);
+    }
+  };
+
+  const handleSignature = async (signatureDataUrl) => {
+    try {
+      // Convert data URL to blob
+      const blob = await fetch(signatureDataUrl).then(r => r.blob());
+      const file = new File([blob], 'signature.png', { type: 'image/png' });
+      
+      // Upload signature
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      setFormData({ ...formData, signature_url: file_url });
+      setShowSignaturePad(false);
+    } catch (err) {
+      alert('Error saving signature');
     }
   };
 
@@ -328,28 +400,104 @@ export default function CreateQuote() {
             </CardContent>
           </Card>
 
-          {/* Actions */}
-          <div className="flex gap-3">
-            <Button
-              onClick={handleSaveAndDownload}
-              disabled={saving || !formData.customer_name || !formData.base_price || !formData.items_description}
-              className="flex-1 bg-emerald-500 hover:bg-emerald-600 h-14 text-lg font-semibold"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Generating...
-                </>
+          {/* Signature */}
+          <Card className="shadow-lg">
+            <CardHeader className="bg-slate-50 border-b">
+              <CardTitle>Customer Signature (Optional)</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {formData.signature_url ? (
+                <div className="space-y-3">
+                  <img src={formData.signature_url} alt="Signature" className="border rounded-lg p-2 bg-white" />
+                  <Button
+                    variant="outline"
+                    onClick={() => setFormData({ ...formData, signature_url: '' })}
+                    className="w-full"
+                  >
+                    Clear Signature
+                  </Button>
+                </div>
               ) : (
-                <>
-                  <Download className="w-5 h-5 mr-2" />
-                  Save & Download PDF
-                </>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowSignaturePad(true)}
+                  className="w-full h-12"
+                >
+                  <PenTool className="w-5 h-5 mr-2" />
+                  Add Signature
+                </Button>
               )}
-            </Button>
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSaveAndDownload}
+                disabled={saving || !formData.customer_name || !formData.base_price || !formData.items_description}
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 h-14 text-lg font-semibold"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5 mr-2" />
+                    Save & Download PDF
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {formData.customer_email && (
+              <Button
+                onClick={() => handleSendQuote('email')}
+                disabled={sending || !formData.customer_name || !formData.base_price || !formData.items_description}
+                variant="outline"
+                className="w-full h-12"
+              >
+                {sending ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5 mr-2" />
+                    Send via Email
+                  </>
+                )}
+              </Button>
+            )}
+
+            {formData.customer_phone && (
+              <Button
+                onClick={() => handleSendQuote('sms')}
+                disabled={sending || !formData.customer_name || !formData.base_price || !formData.items_description}
+                variant="outline"
+                className="w-full h-12"
+              >
+                {sending ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <>
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Send via SMS
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {showSignaturePad && (
+        <SignaturePad
+          onSave={handleSignature}
+          onCancel={() => setShowSignaturePad(false)}
+        />
+      )}
     </div>
   );
 }

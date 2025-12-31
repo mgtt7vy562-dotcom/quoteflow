@@ -145,11 +145,27 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/QuoteHistory">
+          <Link to="/Calendar">
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-500 bg-gradient-to-br from-blue-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <Calendar className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Job Calendar</h3>
+                    <p className="text-slate-600">Schedule and track jobs</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/QuoteHistory">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-purple-500 bg-gradient-to-br from-purple-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
                     <FileText className="w-7 h-7 text-white" />
                   </div>
                   <div>

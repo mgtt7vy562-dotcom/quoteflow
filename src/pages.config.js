@@ -6,6 +6,7 @@ import QuoteHistory from './pages/QuoteHistory';
 import Settings from './pages/Settings';
 import Calendar from './pages/Calendar';
 import ScheduleJob from './pages/ScheduleJob';
+import JobDetails from './pages/JobDetails';
 
 
 export const PAGES = {
@@ -17,6 +18,7 @@ export const PAGES = {
     "Settings": Settings,
     "Calendar": Calendar,
     "ScheduleJob": ScheduleJob,
+    "JobDetails": JobDetails,
 }
 
 export const pagesConfig = {

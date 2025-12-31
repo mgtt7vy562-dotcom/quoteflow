@@ -1,0 +1,305 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  ArrowLeft, 
+  MapPin, 
+  Calendar, 
+  Clock,
+  User,
+  FileText,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Camera
+} from 'lucide-react';
+import PhotoUploader from '../components/quote/PhotoUploader';
+
+export default function JobDetails() {
+  const [user, setUser] = useState(null);
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [completionNotes, setCompletionNotes] = useState('');
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      if (!currentUser.license_validated && currentUser.subscription_status !== 'active') {
+        window.location.href = '/LicenseEntry';
+        return;
+      }
+      setUser(currentUser);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const jobId = urlParams.get('id');
+      
+      const jobs = await base44.entities.Job.filter({ id: jobId });
+      if (jobs.length > 0) {
+        setJob(jobs[0]);
+        setCompletionNotes(jobs[0].completion_notes || '');
+      }
+    } catch (err) {
+      window.location.href = '/LicenseEntry';
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateJobStatus = async (newStatus) => {
+    setUpdating(true);
+    try {
+      await base44.entities.Job.update(job.id, {
+        ...job,
+        status: newStatus,
+        completion_notes: completionNotes
+      });
+      setJob({ ...job, status: newStatus, completion_notes: completionNotes });
+    } catch (err) {
+      alert('Error updating job');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const updatePhotos = async (photoType, photos) => {
+    try {
+      const updates = photoType === 'before' 
+        ? { ...job, before_photos: photos }
+        : { ...job, after_photos: photos };
+      
+      await base44.entities.Job.update(job.id, updates);
+      setJob(updates);
+    } catch (err) {
+      alert('Error updating photos');
+    }
+  };
+
+  const statusColors = {
+    scheduled: 'bg-blue-100 text-blue-700',
+    in_progress: 'bg-yellow-100 text-yellow-700',
+    completed: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700'
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-slate-600">Job not found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
+        <div className="max-w-6xl mx-auto">
+          <a href="/Calendar" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Calendar
+          </a>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">{job.customer_name}</h1>
+              <p className="text-slate-400">Job Details</p>
+            </div>
+            <Badge className={`${statusColors[job.status]} text-lg px-4 py-2`}>
+              {job.status}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto p-4 md:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle>Job Information</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-500 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Date
+                    </p>
+                    <p className="font-medium">{new Date(job.scheduled_date).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Time
+                    </p>
+                    <p className="font-medium">{job.scheduled_time}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Phone
+                    </p>
+                    <p className="font-medium">{job.customer_phone || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Loads
+                    </p>
+                    <p className="font-medium">{job.load_count}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-500 flex items-center gap-2 mb-2">
+                    <MapPin className="w-4 h-4" />
+                    Address
+                  </p>
+                  <p className="font-medium">{job.customer_address}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-500 mb-2">Items</p>
+                  <p className="font-medium">{job.items_description}</p>
+                </div>
+
+                {job.notes && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-2">Notes</p>
+                    <p className="text-slate-700">{job.notes}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Photos */}
+            <Card className="shadow-lg">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="w-5 h-5" />
+                  Job Photos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <PhotoUploader
+                  photos={job.before_photos || []}
+                  onPhotosChange={(photos) => updatePhotos('before', photos)}
+                  label="Before Photos"
+                />
+                <PhotoUploader
+                  photos={job.after_photos || []}
+                  onPhotosChange={(photos) => updatePhotos('after', photos)}
+                  label="After Photos"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Completion Notes */}
+            {job.status !== 'cancelled' && (
+              <Card className="shadow-lg">
+                <CardHeader className="bg-slate-50 border-b">
+                  <CardTitle>Completion Notes</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <Textarea
+                    value={completionNotes}
+                    onChange={(e) => setCompletionNotes(e.target.value)}
+                    placeholder="Add notes about the job completion..."
+                    className="h-24 mb-4"
+                  />
+                  <Button
+                    onClick={() => updateJobStatus(job.status)}
+                    className="w-full bg-emerald-500 hover:bg-emerald-600"
+                  >
+                    Save Notes
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Actions Sidebar */}
+          <div className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle>Total Price</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-4xl font-bold text-emerald-600">
+                  ${job.total_price?.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle>Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-3">
+                {job.status === 'scheduled' && (
+                  <Button
+                    onClick={() => updateJobStatus('in_progress')}
+                    disabled={updating}
+                    className="w-full bg-blue-500 hover:bg-blue-600"
+                  >
+                    {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Start Job'}
+                  </Button>
+                )}
+
+                {job.status === 'in_progress' && (
+                  <Button
+                    onClick={() => updateJobStatus('completed')}
+                    disabled={updating}
+                    className="w-full bg-green-500 hover:bg-green-600"
+                  >
+                    {updating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Complete Job
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {job.status !== 'completed' && job.status !== 'cancelled' && (
+                  <Button
+                    onClick={() => updateJobStatus('cancelled')}
+                    disabled={updating}
+                    variant="outline"
+                    className="w-full text-red-600 border-red-600 hover:bg-red-50"
+                  >
+                    {updating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Cancel Job
+                      </>
+                    )}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
