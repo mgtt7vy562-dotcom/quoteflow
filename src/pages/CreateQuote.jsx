@@ -273,8 +273,10 @@ Reply to accept this quote!`;
 
     setAnalyzing(true);
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a junk removal pricing expert. Analyze this job description and provide detailed estimates.
+      let prompt = '';
+      
+      if (user.service_type === 'junk_removal') {
+        prompt = `You are a junk removal pricing expert. Analyze this job description and provide detailed estimates.
 
 Job Description: "${formData.items_description}"
 
@@ -288,7 +290,40 @@ Based on this, estimate:
 7. Upsell Opportunities: Suggest 2-3 additional services they might need (e.g., dumpster rental, recurring service, yard cleanup)
 8. Notes: Brief explanation of pricing and any considerations
 
-Provide realistic pricing for a professional junk removal service.`,
+Provide realistic pricing for a professional junk removal service.`;
+      } else if (user.service_type === 'lawn_care') {
+        prompt = `You are a lawn care pricing expert. Analyze this job description and provide detailed estimates.
+
+Job Description: "${formData.items_description}"
+Property Size: ${formData.property_size || 'not specified'} sq ft
+
+Based on this, estimate:
+1. Estimated Labor Hours: How many hours will this take? (0.5 to 8)
+2. Base Price: Estimate fair market price based on property size and services ($40-150 for typical residential)
+3. Additional Fees: List any extra services needed (trimming $20-40, edging $15-30, fertilizing $50-100, aeration $75-150)
+4. Upsell Opportunities: Suggest 2-3 additional services they might need (e.g., seasonal cleanup, mulching, pest control)
+5. Notes: Brief explanation of pricing and any considerations
+
+Provide realistic pricing for a professional lawn care service.`;
+      } else {
+        prompt = `You are a residential cleaning pricing expert. Analyze this job description and provide detailed estimates.
+
+Job Description: "${formData.items_description}"
+Bedrooms: ${formData.bedrooms || 'not specified'}
+Bathrooms: ${formData.bathrooms || 'not specified'}
+
+Based on this, estimate:
+1. Estimated Labor Hours: How many hours will this take? (1 to 8)
+2. Base Price: Estimate fair market price based on home size and cleaning type ($80-250 for typical homes)
+3. Additional Fees: List any add-on services (windows $30-60, oven $40-80, fridge $30-50, laundry $25)
+4. Upsell Opportunities: Suggest 2-3 additional services they might need (e.g., recurring weekly service, deep clean add-ons, organization)
+5. Notes: Brief explanation of pricing and any considerations
+
+Provide realistic pricing for a professional residential cleaning service.`;
+      }
+      
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: prompt,
         response_json_schema: {
           type: "object",
           properties: {
@@ -435,7 +470,11 @@ Provide realistic pricing for a professional junk removal service.`,
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label>Items Description</Label>
+                  <Label>
+                    {user?.service_type === 'junk_removal' && 'Items Description'}
+                    {user?.service_type === 'lawn_care' && 'Job Description'}
+                    {user?.service_type === 'residential_cleaning' && 'Cleaning Details'}
+                  </Label>
                   <Button
                     type="button"
                     onClick={handleAIAnalysis}
@@ -460,11 +499,17 @@ Provide realistic pricing for a professional junk removal service.`,
                 <Textarea
                   value={formData.items_description}
                   onChange={(e) => setFormData({ ...formData, items_description: e.target.value })}
-                  placeholder="Be detailed: Couch, refrigerator, 3 bags of trash, old mattress, kitchen table with 4 chairs..."
+                  placeholder={
+                    user?.service_type === 'junk_removal' 
+                      ? "Be detailed: Couch, refrigerator, 3 bags of trash, old mattress, kitchen table with 4 chairs..."
+                      : user?.service_type === 'lawn_care'
+                      ? "Describe the property: Front and backyard, overgrown grass, bushes need trimming, flower beds..."
+                      : "Describe the space: Kitchen needs deep clean, 2 bathrooms standard, living areas dusting..."
+                  }
                   className="mt-1 h-24"
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  💡 Describe items in detail, then click "AI Estimate" to auto-generate pricing
+                  💡 Describe the job in detail, then click "AI Estimate" to auto-generate pricing
                 </p>
               </div>
             </CardContent>
