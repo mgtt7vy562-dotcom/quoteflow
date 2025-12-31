@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [quotes, setQuotes] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showGoalInput, setShowGoalInput] = useState(false);
   const [goalAmount, setGoalAmount] = useState('');
@@ -46,6 +47,9 @@ export default function Dashboard() {
       const allJobs = await base44.entities.Job.list();
       setJobs(allJobs);
 
+      const allExpenses = await base44.entities.Expense.list();
+      setExpenses(allExpenses);
+
       // Check if need to set goal for current month
       const currentMonth = new Date().toISOString().slice(0, 7);
       if (!currentUser.revenue_goal_month || currentUser.revenue_goal_month !== currentMonth) {
@@ -70,6 +74,12 @@ export default function Dashboard() {
   const revenueGoal = user?.monthly_revenue_goal || 0;
   const progressPercent = revenueGoal > 0 ? Math.min((actualRevenue / revenueGoal) * 100, 100) : 0;
 
+  const currentMonthExpenses = expenses.filter(e => {
+    if (!e.date) return false;
+    return e.date.slice(0, 7) === currentMonth;
+  });
+  const totalExpensesThisMonth = currentMonthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+
   const stats = {
     total: quotes.length,
     thisMonth: quotes.filter(q => {
@@ -77,7 +87,9 @@ export default function Dashboard() {
       const now = new Date();
       return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     }).length,
-    revenue: quotes.reduce((sum, q) => sum + (q.total || 0), 0)
+    revenue: quotes.reduce((sum, q) => sum + (q.total || 0), 0),
+    paidQuotes: quotes.filter(q => q.payment_status === 'paid').length,
+    pendingPayment: quotes.filter(q => q.payment_status !== 'paid').length
   };
 
   const motivationalQuotes = [
@@ -219,13 +231,16 @@ export default function Dashboard() {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="bg-white/10 backdrop-blur border-white/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-slate-300 text-sm">Total Quotes</p>
                     <p className="text-3xl font-bold mt-1">{stats.total}</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {stats.paidQuotes} paid • {stats.pendingPayment} pending
+                    </p>
                   </div>
                   <FileText className="w-10 h-10 text-emerald-400" />
                 </div>
@@ -250,8 +265,21 @@ export default function Dashboard() {
                   <div>
                     <p className="text-slate-300 text-sm">All-Time Value</p>
                     <p className="text-3xl font-bold mt-1">${stats.revenue.toLocaleString()}</p>
+                    <p className="text-xs text-slate-400 mt-1">Includes pending</p>
                   </div>
                   <DollarSign className="w-10 h-10 text-yellow-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur border-white/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-300 text-sm">Expenses (Month)</p>
+                    <p className="text-3xl font-bold mt-1 text-red-300">${totalExpensesThisMonth.toLocaleString()}</p>
+                  </div>
+                  <TrendingUp className="w-10 h-10 text-red-400" />
                 </div>
               </CardContent>
             </Card>
@@ -337,6 +365,22 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Analytics</h3>
                     <p className="text-slate-600">Revenue insights & reports</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/Expenses">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-red-500 bg-gradient-to-br from-red-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/30">
+                    <DollarSign className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Expenses</h3>
+                    <p className="text-slate-600">Track fuel, fees & costs</p>
                   </div>
                 </div>
               </CardContent>
