@@ -449,7 +449,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Customer Portal</h3>
-                    <p className="text-slate-600">View jobs & invoices</p>
+                    <p className="text-slate-600">Manage your account & loyalty rewards</p>
                   </div>
                 </div>
               </CardContent>
