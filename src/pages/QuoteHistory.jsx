@@ -169,27 +169,26 @@ export default function QuoteHistory() {
             {filteredQuotes.map((quote) => (
               <Card key={quote.id} className="shadow-lg hover:shadow-xl transition-all">
                 <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                  <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
                           <FileText className="w-6 h-6 text-emerald-600" />
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-xl font-bold text-slate-900">{quote.customer_name}</h3>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="text-lg md:text-xl font-bold text-slate-900">{quote.customer_name}</h3>
                             {quote.service_type === 'junk_removal' && (
-                              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium whitespace-nowrap">
                                 🚛 Junk Removal
                               </span>
                             )}
                             {quote.service_type === 'lawn_care' && (
-                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium whitespace-nowrap">
                                 🌱 Lawn Care
                               </span>
                             )}
                             {quote.service_type === 'residential_cleaning' && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium whitespace-nowrap">
                                 ✨ Cleaning
                               </span>
                             )}
@@ -198,7 +197,7 @@ export default function QuoteHistory() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <p className="text-slate-500 flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
@@ -213,8 +212,8 @@ export default function QuoteHistory() {
                             <FileText className="w-4 h-4" />
                             Details
                           </p>
-                          <p className="font-medium text-slate-900">
-                            {quote.items_description ? (quote.items_description.length > 30 ? quote.items_description.substring(0, 30) + '...' : quote.items_description) :
+                          <p className="font-medium text-slate-900 truncate">
+                            {quote.items_description ? (quote.items_description.length > 20 ? quote.items_description.substring(0, 20) + '...' : quote.items_description) :
                              quote.service_type === 'junk_removal' && quote.load_size ? quote.load_size.replace(/_/g, ' ') : 
                              'N/A'}
                           </p>
@@ -235,48 +234,50 @@ export default function QuoteHistory() {
                           </Badge>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex md:flex-col gap-2">
-                      <Button
-                        onClick={() => handleDownload(quote)}
-                        className="bg-emerald-500 hover:bg-emerald-600"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        PDF
-                      </Button>
-                      {quote.payment_status === 'unpaid' && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                         <Button
-                          onClick={() => handleSendPaymentLink(quote)}
-                          variant="outline"
-                          className="border-green-500 text-green-600 hover:bg-green-50"
-                        >
-                          💳 Payment
-                        </Button>
-                      )}
-                      {quote.status === 'accepted' && !quote.job_id && (
-                        <Button
-                          onClick={() => handleScheduleJob(quote.id)}
-                          variant="outline"
-                          className="border-blue-500 text-blue-600 hover:bg-blue-50"
-                        >
-                          <Calendar className="w-4 h-4 mr-2" />
-                          Schedule
-                        </Button>
-                      )}
-                      {quote.customer_email && (
-                        <Button
-                          onClick={() => handleInviteCustomer(quote)}
-                          variant="outline"
+                          onClick={() => handleDownload(quote)}
+                          className="bg-emerald-500 hover:bg-emerald-600"
                           size="sm"
-                          className="border-purple-500 text-purple-600 hover:bg-purple-50"
                         >
-                          <Mail className="w-4 h-4 mr-2" />
-                          Invite
+                          <Download className="w-4 h-4 mr-1" />
+                          PDF
                         </Button>
-                      )}
+                        {quote.payment_status === 'unpaid' && (
+                          <Button
+                            onClick={() => handleSendPaymentLink(quote)}
+                            variant="outline"
+                            className="border-green-500 text-green-600 hover:bg-green-50"
+                            size="sm"
+                          >
+                            💳 Payment
+                          </Button>
+                        )}
+                        {quote.status === 'accepted' && !quote.job_id && (
+                          <Button
+                            onClick={() => handleScheduleJob(quote.id)}
+                            variant="outline"
+                            className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                            size="sm"
+                          >
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Schedule
+                          </Button>
+                        )}
+                        {quote.customer_email && (
+                          <Button
+                            onClick={() => handleInviteCustomer(quote)}
+                            variant="outline"
+                            className="border-purple-500 text-purple-600 hover:bg-purple-50"
+                            size="sm"
+                          >
+                            <Mail className="w-4 h-4 mr-1" />
+                            Invite
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                   {quote.customer_address && (
                     <div className="mt-4 pt-4 border-t">

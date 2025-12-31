@@ -162,19 +162,17 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-1 flex items-center gap-3">
-                {user?.company_name || 'Quote Generator'}
+              <h1 className="text-3xl font-bold mb-2">{user?.company_name || 'Quote Generator'}</h1>
+              <div className="flex items-center gap-3">
+                <p className="text-slate-400">{user?.email}</p>
                 {user?.service_type && (
-                  <span className="text-lg font-normal px-3 py-1 bg-white/20 rounded-full">
+                  <span className="inline-flex items-center px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-sm font-medium">
                     {user.service_type === 'junk_removal' && '🚛 Junk Removal'}
                     {user.service_type === 'lawn_care' && '🌱 Lawn Care'}
                     {user.service_type === 'residential_cleaning' && '✨ Cleaning'}
                   </span>
                 )}
-              </h1>
-              <p className="text-slate-400">
-                {user?.email}
-              </p>
+              </div>
             </div>
             <Link to="/Settings">
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
@@ -523,7 +521,7 @@ export default function Dashboard() {
                   <Link key={quote.id} to="/QuoteHistory">
                     <div className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <p className="font-semibold text-slate-900">{quote.customer_name}</p>
                           {quote.service_type === 'junk_removal' && (
                             <span className="inline-flex items-center text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
