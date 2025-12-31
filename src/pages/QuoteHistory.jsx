@@ -194,14 +194,11 @@ export default function QuoteHistory() {
                         <div>
                           <p className="text-slate-500 flex items-center gap-1">
                             <FileText className="w-4 h-4" />
-                            {quote.service_type === 'junk_removal' ? 'Load Size' : 
-                             quote.service_type === 'lawn_care' ? 'Property' : 
-                             quote.service_type === 'residential_cleaning' ? 'Rooms' : 'Details'}
+                            {quote.service_type === 'junk_removal' ? 'Load Size' : 'Details'}
                           </p>
                           <p className="font-medium text-slate-900">
                             {quote.service_type === 'junk_removal' && quote.load_size ? quote.load_size.replace(/_/g, ' ') : 
-                             quote.service_type === 'lawn_care' && quote.property_size ? `${quote.property_size} sq ft` : 
-                             quote.service_type === 'residential_cleaning' && quote.bedrooms ? `${quote.bedrooms}bd/${quote.bathrooms}ba` : 
+                             quote.items_description ? (quote.items_description.length > 30 ? quote.items_description.substring(0, 30) + '...' : quote.items_description) :
                              'N/A'}
                           </p>
                         </div>
