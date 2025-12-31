@@ -194,9 +194,14 @@ export default function QuoteHistory() {
                         <div>
                           <p className="text-slate-500 flex items-center gap-1">
                             <FileText className="w-4 h-4" />
-                            Loads
+                            {quote.load_size ? 'Load Size' : quote.property_size ? 'Property' : quote.bedrooms ? 'Rooms' : 'Details'}
                           </p>
-                          <p className="font-medium text-slate-900">{quote.load_count}</p>
+                          <p className="font-medium text-slate-900">
+                            {quote.load_size ? quote.load_size.replace(/_/g, ' ') : 
+                             quote.property_size ? `${quote.property_size} sq ft` : 
+                             quote.bedrooms ? `${quote.bedrooms}bd/${quote.bathrooms}ba` : 
+                             'N/A'}
+                          </p>
                         </div>
                         <div>
                           <p className="text-slate-500 flex items-center gap-1">
