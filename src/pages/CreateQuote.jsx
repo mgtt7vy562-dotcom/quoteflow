@@ -49,11 +49,16 @@ export default function CreateQuote() {
   const loadUser = async () => {
     try {
       const currentUser = await base44.auth.me();
-      if (!currentUser.license_validated) {
+      if (!currentUser.license_validated && currentUser.subscription_status !== 'active') {
         window.location.href = '/LicenseEntry';
         return;
       }
       setUser(currentUser);
+      
+      // Set default tax rate from user settings
+      if (currentUser.default_tax_rate) {
+        setFormData(prev => ({ ...prev, tax_rate: currentUser.default_tax_rate }));
+      }
     } catch (err) {
       window.location.href = '/LicenseEntry';
     } finally {
