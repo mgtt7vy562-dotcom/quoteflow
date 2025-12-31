@@ -83,24 +83,16 @@ export default function LicenseEntry() {
         return;
       }
 
-      // Check if user is logged in
-      try {
-        const user = await base44.auth.me();
-        // User is logged in, update directly
-        await base44.auth.updateMe({
-          email: email,
-          license_key: licenseKey,
-          license_validated: true
-        });
-        window.location.href = '/Dashboard';
-      } catch (authErr) {
-        // User not logged in, store license and redirect to login
-        localStorage.setItem('pending_license_key', licenseKey);
-        localStorage.setItem('pending_license_email', email);
-        base44.auth.redirectToLogin('/Dashboard');
-      }
+      // Store license info and redirect to login/signup
+      localStorage.setItem('pending_license_key', licenseKey);
+      localStorage.setItem('pending_license_email', email);
+      
+      // Redirect to login - user will be redirected back after authentication
+      base44.auth.redirectToLogin('/Dashboard');
+      
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      console.error('License validation error:', err);
+      setError(`Error: ${err.message || 'Please check your license key and email'}`);
       setLoading(false);
     }
   };
