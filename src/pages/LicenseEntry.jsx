@@ -47,20 +47,31 @@ export default function LicenseEntry() {
       
       if (urlKey && urlEmail) {
         // Validate license key
-        const keys = await base44.entities.LicenseKey.filter({ 
-          key: urlKey,
-          is_active: true 
-        });
+        console.log('Validating license:', { key: urlKey, email: urlEmail });
+        
+        const keys = await base44.entities.LicenseKey.list();
+        console.log('All license keys:', keys);
+        
+        const matchingKey = keys.find(k => 
+          k.key === urlKey && 
+          k.is_active && 
+          k.email.toLowerCase() === urlEmail.toLowerCase()
+        );
+        
+        console.log('Matching key found:', matchingKey);
 
-        if (keys.length > 0 && keys[0].email.toLowerCase() === urlEmail.toLowerCase()) {
+        if (matchingKey) {
+          console.log('Updating user with license validation');
           await base44.auth.updateMe({
             license_key: urlKey,
             license_validated: true
           });
+          console.log('Redirecting to Dashboard');
           window.location.href = '/Dashboard';
           return;
         } else {
-          setError('Invalid license key or email does not match');
+          console.log('No matching key found');
+          setError(`Invalid license key or email does not match. Key: ${urlKey}, Email: ${urlEmail}`);
           setChecking(false);
           return;
         }
