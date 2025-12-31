@@ -61,6 +61,33 @@ export default function JobDetails() {
         status: newStatus,
         completion_notes: completionNotes
       });
+      
+      // Update customer record when job is completed
+      if (newStatus === 'completed') {
+        const customers = await base44.entities.Customer.filter({ 
+          name: job.customer_name 
+        });
+        
+        if (customers.length > 0) {
+          const customer = customers[0];
+          await base44.entities.Customer.update(customer.id, {
+            total_jobs: (customer.total_jobs || 0) + 1,
+            total_revenue: (customer.total_revenue || 0) + (job.total_price || 0),
+            last_job_date: job.scheduled_date
+          });
+        } else {
+          await base44.entities.Customer.create({
+            name: job.customer_name,
+            email: job.customer_email,
+            phone: job.customer_phone,
+            address: job.customer_address,
+            total_jobs: 1,
+            total_revenue: job.total_price || 0,
+            last_job_date: job.scheduled_date
+          });
+        }
+      }
+      
       setJob({ ...job, status: newStatus, completion_notes: completionNotes });
     } catch (err) {
       alert('Error updating job');

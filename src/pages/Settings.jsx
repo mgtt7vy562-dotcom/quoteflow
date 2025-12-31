@@ -25,7 +25,8 @@ export default function Settings() {
     address: '',
     logo_url: '',
     stripe_publishable_key: '',
-    stripe_account_id: ''
+    stripe_account_id: '',
+    google_business_url: ''
   });
 
   useEffect(() => {
@@ -46,7 +47,8 @@ export default function Settings() {
         address: currentUser.address || '',
         logo_url: currentUser.logo_url || '',
         stripe_publishable_key: currentUser.stripe_publishable_key || '',
-        stripe_account_id: currentUser.stripe_account_id || ''
+        stripe_account_id: currentUser.stripe_account_id || '',
+        google_business_url: currentUser.google_business_url || ''
       });
     } catch (err) {
       window.location.href = '/LicenseEntry';
@@ -148,6 +150,19 @@ export default function Settings() {
                   placeholder="123 Business St, City, ST 12345"
                   className="mt-1"
                 />
+              </div>
+
+              <div>
+                <Label>Google Business Review Link</Label>
+                <Input
+                  value={formData.google_business_url}
+                  onChange={(e) => setFormData({ ...formData, google_business_url: e.target.value })}
+                  placeholder="https://g.page/r/YOUR_ID/review"
+                  className="mt-1"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  💡 Used in automated follow-up emails to collect reviews
+                </p>
               </div>
             </CardContent>
           </Card>

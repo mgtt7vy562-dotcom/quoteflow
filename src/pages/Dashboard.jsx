@@ -10,7 +10,8 @@ import {
   TrendingUp,
   Calendar,
   DollarSign,
-  Loader2
+  Loader2,
+  User
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -304,6 +305,38 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Quote History</h3>
                     <p className="text-slate-600">View all past quotes</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/Customers">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-orange-500 bg-gradient-to-br from-orange-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+                    <User className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Customers</h3>
+                    <p className="text-slate-600">Manage customer database</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/Analytics">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-pink-500 bg-gradient-to-br from-pink-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30">
+                    <TrendingUp className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Analytics</h3>
+                    <p className="text-slate-600">Revenue insights & reports</p>
                   </div>
                 </div>
               </CardContent>

@@ -8,6 +8,8 @@ import Calendar from './pages/Calendar';
 import ScheduleJob from './pages/ScheduleJob';
 import JobDetails from './pages/JobDetails';
 import PaymentPage from './pages/PaymentPage';
+import Customers from './pages/Customers';
+import Analytics from './pages/Analytics';
 
 
 export const PAGES = {
@@ -21,6 +23,8 @@ export const PAGES = {
     "ScheduleJob": ScheduleJob,
     "JobDetails": JobDetails,
     "PaymentPage": PaymentPage,
+    "Customers": Customers,
+    "Analytics": Analytics,
 }
 
 export const pagesConfig = {
