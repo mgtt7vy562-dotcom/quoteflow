@@ -33,11 +33,54 @@ export default function LicenseEntry() {
   const checkExistingLicense = async () => {
     try {
       const user = await base44.auth.me();
+      
+      // Check if redirected back with license info in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlKey = urlParams.get('key');
+      const urlEmail = urlParams.get('email');
+      
+      if (urlKey && urlEmail && !user.license_validated) {
+        // Validate the license now that user is authenticated
+        try {
+          const keys = await base44.entities.LicenseKey.filter({ 
+            key: urlKey,
+            is_active: true 
+          });
+
+          if (keys.length === 0) {
+            setError('Invalid or inactive license key');
+            setChecking(false);
+            return;
+          }
+
+          const keyData = keys[0];
+          
+          if (keyData.email.toLowerCase() !== urlEmail.toLowerCase()) {
+            setError('Email does not match license key');
+            setChecking(false);
+            return;
+          }
+
+          // Update user with license
+          await base44.auth.updateMe({
+            license_key: urlKey,
+            license_validated: true
+          });
+          
+          window.location.href = '/Dashboard';
+          return;
+        } catch (validationErr) {
+          setError('License validation failed. Please try again.');
+          setChecking(false);
+          return;
+        }
+      }
+      
       if (user.license_validated) {
         window.location.href = '/Dashboard';
       }
     } catch (err) {
-      // User not logged in or no license
+      // User not logged in - show form
     } finally {
       setChecking(false);
     }
@@ -62,37 +105,11 @@ export default function LicenseEntry() {
     setLoading(true);
 
     try {
-      // Check if license key exists and is active
-      const keys = await base44.entities.LicenseKey.filter({ 
-        key: licenseKey,
-        is_active: true 
-      });
-
-      if (keys.length === 0) {
-        setError('Invalid or inactive license key');
-        setLoading(false);
-        return;
-      }
-
-      const keyData = keys[0];
-      
-      // Check if email matches
-      if (keyData.email.toLowerCase() !== email.toLowerCase()) {
-        setError('Email does not match license key');
-        setLoading(false);
-        return;
-      }
-
-      // Store license info and redirect to login/signup
-      localStorage.setItem('pending_license_key', licenseKey);
-      localStorage.setItem('pending_license_email', email);
-      
-      // Redirect to login - user will be redirected back after authentication
-      base44.auth.redirectToLogin('/Dashboard');
-      
+      // First login/authenticate the user
+      base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey)}&email=${encodeURIComponent(email)}`);
     } catch (err) {
-      console.error('License validation error:', err);
-      setError(`Error: ${err.message || 'Please check your license key and email'}`);
+      console.error('Login error:', err);
+      setError('Unable to proceed to login. Please try again.');
       setLoading(false);
     }
   };
