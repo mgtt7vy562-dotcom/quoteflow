@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function Customers() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +34,7 @@ export default function Customers() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+        navigate(createPageUrl('LicenseEntry'));
         return;
       }
       setUser(currentUser);
@@ -43,7 +42,7 @@ export default function Customers() {
       const allCustomers = await base44.entities.Customer.list('-total_revenue');
       setCustomers(allCustomers);
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      navigate(createPageUrl('LicenseEntry'));
     } finally {
       setLoading(false);
     }
