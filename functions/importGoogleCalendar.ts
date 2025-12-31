@@ -40,14 +40,12 @@ Deno.serve(async (req) => {
       // Skip all-day events or events without start time
       if (!event.start?.dateTime) continue;
 
-      const startDateTime = new Date(event.start.dateTime);
       const eventTitle = event.summary || 'Untitled Event';
       
       // Check if we already imported this event (by checking title and date)
       const duplicate = existingJobs.some(job => {
-        const jobDate = new Date(job.scheduled_date);
         return job.customer_name === eventTitle && 
-               jobDate.toDateString() === startDateTime.toDateString();
+               job.scheduled_date === event.start.dateTime;
       });
 
       if (duplicate) continue;
@@ -56,17 +54,22 @@ Deno.serve(async (req) => {
       const description = event.description || '';
       const location = event.location || '';
       
+      // Parse the time properly
+      const startDateTime = new Date(event.start.dateTime);
+      const timeString = startDateTime.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true,
+        timeZone: 'America/Chicago'
+      });
+      
       // Create job from calendar event
       await base44.entities.Job.create({
         customer_name: eventTitle,
         customer_address: location,
         customer_phone: '',
         scheduled_date: event.start.dateTime,
-        scheduled_time: startDateTime.toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
-          minute: '2-digit', 
-          hour12: true 
-        }),
+        scheduled_time: timeString,
         status: 'scheduled',
         service_type: user.service_type || 'junk_removal',
         items_description: description || 'Imported from Google Calendar',
