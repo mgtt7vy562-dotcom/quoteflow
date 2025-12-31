@@ -115,16 +115,18 @@ export default function Dashboard() {
   });
   const totalExpensesThisMonth = currentMonthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
 
+  const quotesThisMonth = quotes.filter(q => {
+    const date = new Date(q.created_date);
+    const now = new Date();
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  });
+
   const stats = {
-    total: quotes.length,
-    thisMonth: quotes.filter(q => {
-      const date = new Date(q.created_date);
-      const now = new Date();
-      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-    }).length,
-    revenue: quotes.reduce((sum, q) => sum + (q.total || 0), 0),
-    paidQuotes: quotes.filter(q => q.payment_status === 'paid').length,
-    pendingPayment: quotes.filter(q => q.payment_status !== 'paid').length
+    total: quotesThisMonth.length,
+    thisMonth: quotesThisMonth.length,
+    revenue: quotesThisMonth.reduce((sum, q) => sum + (q.total || 0), 0),
+    paidQuotes: quotesThisMonth.filter(q => q.payment_status === 'paid').length,
+    pendingPayment: quotesThisMonth.filter(q => q.payment_status !== 'paid').length
   };
 
   const motivationalQuotes = [
@@ -271,7 +273,7 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-300 text-sm">Total Quotes</p>
+                    <p className="text-slate-300 text-sm">Quotes This Month</p>
                     <p className="text-3xl font-bold mt-1">{stats.total}</p>
                     <p className="text-xs text-slate-400 mt-1">
                       {stats.paidQuotes} paid • {stats.pendingPayment} pending
@@ -298,9 +300,9 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-300 text-sm">All-Time Value</p>
+                    <p className="text-slate-300 text-sm">Revenue This Month</p>
                     <p className="text-3xl font-bold mt-1">${stats.revenue.toLocaleString()}</p>
-                    <p className="text-xs text-slate-400 mt-1">Includes pending</p>
+                    <p className="text-xs text-slate-400 mt-1">Quotes value</p>
                   </div>
                   <DollarSign className="w-10 h-10 text-yellow-400" />
                 </div>
