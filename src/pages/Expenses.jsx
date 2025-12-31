@@ -11,8 +11,12 @@ import {
   Trash2, 
   DollarSign,
   Loader2,
-  TrendingDown
+  TrendingDown,
+  Camera,
+  X
 } from 'lucide-react';
+import QuickExpenseTemplates from '../components/expenses/QuickExpenseTemplates';
+import ReceiptScanner from '../components/expenses/ReceiptScanner';
 
 export default function Expenses() {
   const [user, setUser] = useState(null);
@@ -26,7 +30,8 @@ export default function Expenses() {
     date: new Date().toISOString().split('T')[0],
     category: 'fuel',
     amount: '',
-    description: ''
+    description: '',
+    receipt_url: ''
   });
 
   useEffect(() => {
@@ -63,7 +68,8 @@ export default function Expenses() {
         date: new Date().toISOString().split('T')[0],
         category: 'fuel',
         amount: '',
-        description: ''
+        description: '',
+        receipt_url: ''
       });
       setShowForm(false);
       await loadData();
@@ -127,13 +133,22 @@ export default function Expenses() {
               <TrendingDown className="w-8 h-8" />
               Expense Tracking
             </h1>
-            <Button
-              onClick={() => setShowForm(!showForm)}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Expense
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowScanner(true)}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Scan Receipt
+              </Button>
+              <Button
+                onClick={() => setShowForm(!showForm)}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Expense
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -165,6 +180,18 @@ export default function Expenses() {
       </div>
 
       <div className="max-w-6xl mx-auto p-4 md:p-8">
+        {!showForm && (
+          <div className="mb-6">
+            <QuickExpenseTemplates 
+              onAddExpense={(expense) => {
+                setFormData(expense);
+                setShowForm(true);
+              }}
+              serviceType={user?.service_type}
+            />
+          </div>
+        )}
+
         {showForm && (
           <Card className="shadow-lg mb-6">
             <CardHeader className="bg-slate-50 border-b">
@@ -224,6 +251,24 @@ export default function Expenses() {
                     className="mt-1 h-20"
                   />
                 </div>
+
+                {formData.receipt_url && (
+                  <div>
+                    <Label>Receipt Image</Label>
+                    <div className="mt-1 relative">
+                      <img src={formData.receipt_url} alt="Receipt" className="w-full rounded-lg border" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setFormData({ ...formData, receipt_url: '' })}
+                        className="absolute top-2 right-2 bg-white/90 hover:bg-white"
+                      >
+                        <X className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <Button
@@ -305,6 +350,17 @@ export default function Expenses() {
           </CardContent>
         </Card>
       </div>
+
+      {showScanner && (
+        <ReceiptScanner
+          onExpenseExtracted={(expense) => {
+            setFormData({ ...formData, ...expense });
+            setShowScanner(false);
+            setShowForm(true);
+          }}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 }

@@ -15,7 +15,9 @@ import {
   CheckCircle,
   XCircle,
   Camera,
-  DollarSign
+  DollarSign,
+  Send,
+  X
 } from 'lucide-react';
 import PhotoUploader from '../components/quote/PhotoUploader';
 import AIJobUpsells from '../components/jobs/AIJobUpsells';
@@ -26,6 +28,9 @@ export default function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [completionNotes, setCompletionNotes] = useState('');
+  const [completionPhotos, setCompletionPhotos] = useState([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [sendingPhotos, setSendingPhotos] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -57,13 +62,66 @@ export default function JobDetails() {
     }
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setCompletionPhotos([...completionPhotos, file_url]);
+    } catch (err) {
+      alert('Error uploading photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleSendPhotos = async () => {
+    if (completionPhotos.length === 0) {
+      alert('Please take at least one photo first');
+      return;
+    }
+
+    if (!job.customer_email) {
+      alert('No customer email available');
+      return;
+    }
+
+    setSendingPhotos(true);
+    try {
+      const photoLinks = completionPhotos.map((url, idx) => `Photo ${idx + 1}: ${url}`).join('\n\n');
+      
+      await base44.integrations.Core.SendEmail({
+        to: job.customer_email,
+        subject: `Job Completion Photos - ${user?.company_name}`,
+        body: `Hi ${job.customer_name},
+
+Your job has been completed! Here are the completion photos:
+
+${photoLinks}
+
+Thank you for choosing ${user?.company_name}!
+
+Address: ${job.customer_address}
+Completed: ${new Date().toLocaleDateString()}`
+      });
+      alert('Photos sent via email!');
+    } catch (err) {
+      alert('Error sending photos: ' + err.message);
+    } finally {
+      setSendingPhotos(false);
+    }
+  };
+
   const updateJobStatus = async (newStatus) => {
     setUpdating(true);
     try {
       await base44.entities.Job.update(job.id, {
         ...job,
         status: newStatus,
-        completion_notes: completionNotes
+        completion_notes: completionNotes,
+        after_photos: completionPhotos
       });
       
       // Update customer record and send thank you when job is completed
@@ -303,6 +361,74 @@ export default function JobDetails() {
                     placeholder="Add notes about the job completion..."
                     className="h-24 mb-4"
                   />
+                  
+                  <div className="mb-4">
+                    <Label className="mb-2 block">Job Completion Photos</Label>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-3 gap-2">
+                        {completionPhotos.map((photo, idx) => (
+                          <div key={idx} className="relative">
+                            <img src={photo} alt={`Completion ${idx + 1}`} className="w-full h-24 object-cover rounded-lg border" />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setCompletionPhotos(completionPhotos.filter((_, i) => i !== idx))}
+                              className="absolute top-1 right-1 h-6 w-6 bg-white/90 hover:bg-white"
+                            >
+                              <X className="w-3 h-3 text-red-500" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <label className="flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handlePhotoUpload}
+                            disabled={uploadingPhoto}
+                            className="hidden"
+                          />
+                          <Button 
+                            type="button"
+                            variant="outline" 
+                            className="w-full" 
+                            disabled={uploadingPhoto}
+                            asChild
+                          >
+                            <span>
+                              {uploadingPhoto ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Camera className="w-4 h-4 mr-2" />
+                              )}
+                              Take Photo
+                            </span>
+                          </Button>
+                        </label>
+
+                        {completionPhotos.length > 0 && (
+                          <Button
+                            type="button"
+                            onClick={handleSendPhotos}
+                            disabled={sendingPhotos}
+                            className="bg-blue-500 hover:bg-blue-600"
+                          >
+                            {sendingPhotos ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4 mr-2" />
+                            )}
+                            Send to Customer
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <Button
                     onClick={() => updateJobStatus(job.status)}
                     className="w-full bg-emerald-500 hover:bg-emerald-600"
