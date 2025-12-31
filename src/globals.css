@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Disable mobile swipe-to-navigate gestures to prevent conflicts with SPA routing */
+body {
+  overscroll-behavior-x: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+html, body {
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Prevent pull-to-refresh and swipe navigation on mobile */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Disable browser back/forward swipe gestures */
+* {
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Allow text selection but prevent horizontal swipes */
+input, textarea {
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden !important;
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Improve touch responsiveness */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Better text rendering on mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

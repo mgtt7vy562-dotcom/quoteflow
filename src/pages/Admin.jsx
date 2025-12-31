@@ -94,10 +94,13 @@ export default function Admin() {
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-8 px-4 shadow-xl">
         <div className="max-w-6xl mx-auto">
-          <Link to={createPageUrl('Dashboard')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Link>
+            Back
+          </button>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Shield className="w-8 h-8" />
             Admin Dashboard

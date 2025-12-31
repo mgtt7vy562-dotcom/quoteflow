@@ -114,10 +114,13 @@ export default function ScheduleJob() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-4xl mx-auto">
-          <Link to={createPageUrl('Calendar')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Calendar
-          </Link>
+            Back
+          </button>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Calendar className="w-8 h-8" />
             Schedule New Job
