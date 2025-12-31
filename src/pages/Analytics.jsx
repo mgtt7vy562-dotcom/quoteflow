@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
-  ArrowLeft,
-  TrendingUp,
+  ArrowLeft, 
+  TrendingUp, 
   DollarSign,
-  Calendar,
-  Target,
   Loader2,
   Download,
-  Mail
+  Calendar,
+  Users,
+  Package,
+  Award
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function Analytics() {
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState({
+    start: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
+    end: new Date().toISOString().split('T')[0]
+  });
 
   useEffect(() => {
     loadData();
@@ -33,11 +41,13 @@ export default function Analytics() {
       }
       setUser(currentUser);
 
-      const allJobs = await base44.entities.Job.filter({ status: 'completed' });
-      setJobs(allJobs);
-
+      const allJobs = await base44.entities.Job.list();
       const allExpenses = await base44.entities.Expense.list();
+      const allCustomers = await base44.entities.Customer.list();
+      
+      setJobs(allJobs.filter(j => j.status === 'completed'));
       setExpenses(allExpenses);
+      setCustomers(allCustomers);
     } catch (err) {
       window.location.href = '/LicenseEntry';
     } finally {
@@ -45,148 +55,134 @@ export default function Analytics() {
     }
   };
 
-  // Calculate monthly revenue data
-  const getMonthlyData = () => {
-    const monthlyRevenue = {};
-    
-    jobs.forEach(job => {
-      const date = new Date(job.scheduled_date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
-      if (!monthlyRevenue[monthKey]) {
-        monthlyRevenue[monthKey] = 0;
-      }
-      monthlyRevenue[monthKey] += job.total_price || 0;
-    });
-
-    return Object.entries(monthlyRevenue)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-6)
-      .map(([month, revenue]) => ({
-        month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-        revenue: revenue
-      }));
-  };
-
-  // Current month stats
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const currentMonthJobs = jobs.filter(j => {
-    const date = new Date(j.scheduled_date);
-    return date.toISOString().slice(0, 7) === currentMonth;
+  // Filter data by date range
+  const filteredJobs = jobs.filter(j => {
+    const jobDate = new Date(j.scheduled_date).toISOString().split('T')[0];
+    return jobDate >= dateRange.start && jobDate <= dateRange.end;
   });
 
-  const currentRevenue = currentMonthJobs.reduce((sum, j) => sum + (j.total_price || 0), 0);
-  const revenueGoal = user?.monthly_revenue_goal || 0;
-  const progressPercent = revenueGoal > 0 ? (currentRevenue / revenueGoal) * 100 : 0;
-  const remaining = Math.max(0, revenueGoal - currentRevenue);
+  const filteredExpenses = expenses.filter(e => {
+    const expDate = e.date;
+    return expDate >= dateRange.start && expDate <= dateRange.end;
+  });
 
-  // Average job value
-  const avgJobValue = jobs.length > 0 
-    ? jobs.reduce((sum, j) => sum + (j.total_price || 0), 0) / jobs.length 
-    : 0;
+  // Revenue and Profit Calculations
+  const totalRevenue = filteredJobs.reduce((sum, j) => sum + (j.total_price || 0), 0);
+  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  const totalProfit = totalRevenue - totalExpenses;
+  const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
 
-  const monthlyData = getMonthlyData();
+  // Popular Services Analysis
+  const loadSizeData = {};
+  const debrisTypeData = {};
+  
+  filteredJobs.forEach(job => {
+    loadSizeData[job.load_size] = (loadSizeData[job.load_size] || 0) + 1;
+    debrisTypeData[job.debris_type] = (debrisTypeData[job.debris_type] || 0) + 1;
+  });
 
-  const emailMonthlyReport = async (month) => {
-    if (!user?.email) {
-      alert('No email configured');
-      return;
+  const loadSizeChart = Object.entries(loadSizeData).map(([name, value]) => ({
+    name: name.replace(/_/g, ' ').toUpperCase(),
+    jobs: value,
+    revenue: filteredJobs.filter(j => j.load_size === name).reduce((sum, j) => sum + (j.total_price || 0), 0)
+  }));
+
+  const debrisTypeChart = Object.entries(debrisTypeData).map(([name, value]) => ({
+    name: name.replace(/_/g, ' ').toUpperCase(),
+    value: value
+  }));
+
+  // Customer Acquisition Sources
+  const sourceData = {};
+  customers.forEach(c => {
+    if (c.source) {
+      sourceData[c.source] = (sourceData[c.source] || 0) + 1;
     }
+  });
 
-    const selectedMonth = month || currentMonth;
-    const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    
-    const monthJobs = jobs.filter(j => {
-      const date = new Date(j.scheduled_date);
-      return date.toISOString().slice(0, 7) === selectedMonth;
-    });
-    
-    const monthExpenses = expenses.filter(e => e.date?.startsWith(selectedMonth));
-    
-    const revenue = monthJobs.reduce((sum, j) => sum + (j.total_price || 0), 0);
-    const totalExpenses = monthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-    const profit = revenue - totalExpenses;
+  const sourceChart = Object.entries(sourceData).map(([name, value]) => ({
+    name: name.toUpperCase(),
+    customers: value
+  }));
 
-    const emailBody = `
-📊 Monthly Business Report - ${monthName}
-
-SUMMARY
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-💰 Total Revenue: $${revenue.toLocaleString()}
-💸 Total Expenses: $${totalExpenses.toLocaleString()}
-✅ Net Profit: $${profit.toLocaleString()}
-📋 Jobs Completed: ${monthJobs.length}
-📈 Average Job Value: $${monthJobs.length > 0 ? (revenue / monthJobs.length).toFixed(0) : '0'}
-
-COMPLETED JOBS (${monthJobs.length})
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-${monthJobs.map(j => `• ${new Date(j.scheduled_date).toLocaleDateString()} - ${j.customer_name} - $${j.total_price?.toLocaleString()}`).join('\n')}
-
-EXPENSES (${monthExpenses.length})
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-${monthExpenses.map(e => `• ${new Date(e.date).toLocaleDateString()} - ${e.category} - $${e.amount?.toLocaleString()}`).join('\n')}
-
-Keep up the great work! 🚀
-    `.trim();
-
-    try {
-      await base44.integrations.Core.SendEmail({
-        to: user.email,
-        subject: `📊 Monthly Report - ${monthName}`,
-        body: emailBody
-      });
-      alert('Monthly report sent to your email!');
-    } catch (err) {
-      alert('Error sending email');
+  // Technician Performance
+  const technicianData = {};
+  filteredJobs.forEach(job => {
+    const tech = job.assigned_to || 'Unassigned';
+    if (!technicianData[tech]) {
+      technicianData[tech] = { jobs: 0, revenue: 0 };
     }
-  };
+    technicianData[tech].jobs++;
+    technicianData[tech].revenue += job.total_price || 0;
+  });
 
-  const exportMonthlyReport = (month) => {
-    const selectedMonth = month || currentMonth;
-    const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    
-    // Filter data for selected month
-    const monthJobs = jobs.filter(j => {
-      const date = new Date(j.scheduled_date);
-      return date.toISOString().slice(0, 7) === selectedMonth;
-    });
-    
-    const monthExpenses = expenses.filter(e => e.date?.startsWith(selectedMonth));
-    
-    const revenue = monthJobs.reduce((sum, j) => sum + (j.total_price || 0), 0);
-    const totalExpenses = monthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-    const profit = revenue - totalExpenses;
-    
-    // Create CSV content
-    let csv = `Monthly Business Report - ${monthName}\n\n`;
-    
-    csv += `SUMMARY\n`;
-    csv += `Total Revenue,$${revenue.toFixed(2)}\n`;
-    csv += `Total Expenses,$${totalExpenses.toFixed(2)}\n`;
-    csv += `Net Profit,$${profit.toFixed(2)}\n`;
-    csv += `Jobs Completed,${monthJobs.length}\n`;
-    csv += `Average Job Value,$${monthJobs.length > 0 ? (revenue / monthJobs.length).toFixed(2) : '0.00'}\n\n`;
-    
-    csv += `COMPLETED JOBS\n`;
-    csv += `Date,Customer,Load Size,Price\n`;
-    monthJobs.forEach(job => {
-      csv += `${new Date(job.scheduled_date).toLocaleDateString()},${job.customer_name},${job.load_size || 'N/A'},$${(job.total_price || 0).toFixed(2)}\n`;
-    });
-    
-    csv += `\nEXPENSES\n`;
-    csv += `Date,Category,Description,Amount\n`;
-    monthExpenses.forEach(expense => {
-      csv += `${new Date(expense.date).toLocaleDateString()},${expense.category},${expense.description || ''},$${(expense.amount || 0).toFixed(2)}\n`;
-    });
-    
-    // Download CSV
-    const blob = new Blob([csv], { type: 'text/csv' });
+  const technicianChart = Object.entries(technicianData).map(([name, data]) => ({
+    name: name.split('@')[0] || name,
+    jobs: data.jobs,
+    revenue: data.revenue
+  }));
+
+  // Monthly Trend (last 12 months from date range)
+  const monthlyData = {};
+  filteredJobs.forEach(job => {
+    const date = new Date(job.scheduled_date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = { revenue: 0, expenses: 0, jobs: 0 };
+    }
+    monthlyData[monthKey].revenue += job.total_price || 0;
+    monthlyData[monthKey].jobs++;
+  });
+
+  filteredExpenses.forEach(exp => {
+    const monthKey = exp.date.slice(0, 7);
+    if (monthlyData[monthKey]) {
+      monthlyData[monthKey].expenses += exp.amount || 0;
+    }
+  });
+
+  const trendData = Object.entries(monthlyData)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, data]) => ({
+      month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+      revenue: data.revenue,
+      expenses: data.expenses,
+      profit: data.revenue - data.expenses,
+      jobs: data.jobs
+    }));
+
+  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+  const handleExportCSV = () => {
+    const csvData = [
+      ['Analytics Report'],
+      [`Date Range: ${dateRange.start} to ${dateRange.end}`],
+      [''],
+      ['Summary'],
+      ['Total Revenue', `$${totalRevenue.toFixed(2)}`],
+      ['Total Expenses', `$${totalExpenses.toFixed(2)}`],
+      ['Total Profit', `$${totalProfit.toFixed(2)}`],
+      ['Profit Margin', `${profitMargin}%`],
+      ['Total Jobs', filteredJobs.length],
+      [''],
+      ['Load Size Breakdown'],
+      ['Load Size', 'Jobs', 'Revenue'],
+      ...loadSizeChart.map(item => [item.name, item.jobs, `$${item.revenue.toFixed(2)}`]),
+      [''],
+      ['Technician Performance'],
+      ['Technician', 'Jobs', 'Revenue'],
+      ...technicianChart.map(item => [item.name, item.jobs, `$${item.revenue.toFixed(2)}`])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvData], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Business-Report-${selectedMonth}.csv`;
+    a.download = `analytics-${dateRange.start}-to-${dateRange.end}.csv`;
+    document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
+    a.remove();
   };
 
   if (loading) {
@@ -200,93 +196,67 @@ Keep up the great work! 🚀
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <a href="/Dashboard" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <TrendingUp className="w-8 h-8" />
-              Revenue Analytics
+              Advanced Analytics
             </h1>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => emailMonthlyReport(currentMonth)}
-                variant="outline"
-                className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Email Report
-              </Button>
-              <Button
-                onClick={() => exportMonthlyReport(currentMonth)}
-                className="bg-emerald-500 hover:bg-emerald-600"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export CSV
-              </Button>
-            </div>
+            <Button
+              onClick={handleExportCSV}
+              className="bg-emerald-500 hover:bg-emerald-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4 md:p-8">
-        {/* Current Month Goal Progress */}
-        {revenueGoal > 0 && (
-          <Card className="shadow-lg mb-6">
-            <CardHeader className="bg-slate-50 border-b">
-              <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-emerald-500" />
-                Current Month Goal Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        {/* Date Range Filter */}
+        <Card className="shadow-lg mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Calendar className="w-5 h-5 text-slate-500" />
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-slate-500 mb-1">Current Revenue</p>
-                  <p className="text-3xl font-bold text-emerald-600">${currentRevenue.toLocaleString()}</p>
+                  <Label>Start Date</Label>
+                  <Input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    className="mt-1"
+                  />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 mb-1">Goal</p>
-                  <p className="text-3xl font-bold text-slate-900">${revenueGoal.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Remaining</p>
-                  <p className="text-3xl font-bold text-orange-600">${remaining.toLocaleString()}</p>
+                  <Label>End Date</Label>
+                  <Input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    className="mt-1"
+                  />
                 </div>
               </div>
-              
-              <div className="w-full bg-slate-200 rounded-full h-6 overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-500 flex items-center justify-center text-sm font-bold text-white ${
-                    progressPercent >= 100 ? 'bg-gradient-to-r from-emerald-500 to-green-600' : 'bg-gradient-to-r from-blue-500 to-emerald-500'
-                  }`}
-                  style={{ width: `${Math.min(progressPercent, 100)}%` }}
-                >
-                  {progressPercent > 10 && `${progressPercent.toFixed(0)}%`}
-                </div>
-              </div>
-
-              {progressPercent >= 100 && (
-                <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
-                  <p className="text-emerald-700 font-semibold">🎉 Congratulations! You've hit your goal!</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card className="shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">Total Completed Jobs</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-1">{jobs.length}</p>
+                  <p className="text-sm text-slate-500">Total Revenue</p>
+                  <p className="text-2xl font-bold text-emerald-600">${totalRevenue.toLocaleString()}</p>
                 </div>
-                <Calendar className="w-10 h-10 text-blue-500" />
+                <DollarSign className="w-10 h-10 text-emerald-400" />
               </div>
             </CardContent>
           </Card>
@@ -295,10 +265,10 @@ Keep up the great work! 🚀
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">Average Job Value</p>
-                  <p className="text-3xl font-bold text-emerald-600 mt-1">${avgJobValue.toFixed(0)}</p>
+                  <p className="text-sm text-slate-500">Total Expenses</p>
+                  <p className="text-2xl font-bold text-red-600">${totalExpenses.toLocaleString()}</p>
                 </div>
-                <DollarSign className="w-10 h-10 text-emerald-500" />
+                <TrendingUp className="w-10 h-10 text-red-400" />
               </div>
             </CardContent>
           </Card>
@@ -307,71 +277,190 @@ Keep up the great work! 🚀
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">This Month</p>
-                  <p className="text-3xl font-bold text-blue-600 mt-1">{currentMonthJobs.length}</p>
-                  <p className="text-xs text-slate-500 mt-1">completed jobs</p>
+                  <p className="text-sm text-slate-500">Net Profit</p>
+                  <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ${totalProfit.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">{profitMargin}% margin</p>
                 </div>
-                <TrendingUp className="w-10 h-10 text-blue-500" />
+                <Award className="w-10 h-10 text-yellow-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">Completed Jobs</p>
+                  <p className="text-2xl font-bold text-blue-600">{filteredJobs.length}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    ${filteredJobs.length > 0 ? (totalRevenue / filteredJobs.length).toFixed(0) : 0} avg
+                  </p>
+                </div>
+                <Package className="w-10 h-10 text-blue-400" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Monthly Revenue Chart */}
+        {/* Revenue & Profit Trend */}
         <Card className="shadow-lg mb-6">
           <CardHeader className="bg-slate-50 border-b">
-            <CardTitle>Revenue Trend (Last 6 Months)</CardTitle>
+            <CardTitle>Revenue & Profit Trend</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            {monthlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value) => `$${value.toLocaleString()}`}
-                    labelStyle={{ color: '#000' }}
-                  />
-                  <Bar dataKey="revenue" fill="#10b981" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-center text-slate-500 py-12">No data yet. Complete jobs to see analytics!</p>
-            )}
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                <Legend />
+                <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} name="Revenue" />
+                <Line type="monotone" dataKey="expenses" stroke="#ef4444" strokeWidth={2} name="Expenses" />
+                <Line type="monotone" dataKey="profit" stroke="#3b82f6" strokeWidth={2} name="Profit" />
+              </LineChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Popular Load Sizes */}
+          <Card className="shadow-lg">
+            <CardHeader className="bg-slate-50 border-b">
+              <CardTitle>Popular Load Sizes</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={loadSizeChart}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="jobs" fill="#3b82f6" name="Jobs" />
+                  <Bar yAxisId="right" dataKey="revenue" fill="#10b981" name="Revenue ($)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Debris Types */}
+          <Card className="shadow-lg">
+            <CardHeader className="bg-slate-50 border-b">
+              <CardTitle>Debris Type Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={debrisTypeChart}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(entry) => `${entry.name}: ${entry.value}`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {debrisTypeChart.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Customer Acquisition */}
+          {sourceChart.length > 0 && (
+            <Card className="shadow-lg">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle>Customer Acquisition Sources</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={sourceChart}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="customers" fill="#8b5cf6" name="Customers" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Technician Performance */}
+          {technicianChart.length > 0 && (
+            <Card className="shadow-lg">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle>Technician Performance</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={technicianChart}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="jobs" fill="#f59e0b" name="Jobs Completed" />
+                    <Bar yAxisId="right" dataKey="revenue" fill="#10b981" name="Revenue ($)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Detailed Breakdown */}
         <Card className="shadow-lg">
           <CardHeader className="bg-slate-50 border-b">
-            <CardTitle>Business Insights</CardTitle>
+            <CardTitle>Top Performers</CardTitle>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            {progressPercent < 100 && revenueGoal > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="font-semibold text-blue-900 mb-1">To Hit Your Goal:</p>
-                <p className="text-sm text-blue-700">
-                  You need {Math.ceil(remaining / avgJobValue)} more jobs at your current average of ${avgJobValue.toFixed(0)}/job
-                </p>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Top Load Size</h4>
+                {loadSizeChart.sort((a, b) => b.revenue - a.revenue).slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-slate-600">{item.name}</span>
+                    <span className="font-semibold text-emerald-600">${item.revenue.toLocaleString()}</span>
+                  </div>
+                ))}
               </div>
-            )}
-            
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-              <p className="font-semibold text-emerald-900 mb-1">💡 Pro Tip:</p>
-              <p className="text-sm text-emerald-700">
-                Follow up with past customers every 3-6 months. Many need repeat services!
-              </p>
-            </div>
 
-            {currentMonthJobs.length > 0 && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <p className="font-semibold text-purple-900 mb-1">This Month's Performance:</p>
-                <p className="text-sm text-purple-700">
-                  ${(currentRevenue / currentMonthJobs.length).toFixed(0)} average per job | {currentMonthJobs.length} jobs completed
-                </p>
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Top Technicians</h4>
+                {technicianChart.sort((a, b) => b.revenue - a.revenue).slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-slate-600">{item.name}</span>
+                    <span className="font-semibold text-blue-600">{item.jobs} jobs</span>
+                  </div>
+                ))}
               </div>
-            )}
+
+              <div>
+                <h4 className="font-semibold text-slate-700 mb-3">Expense Breakdown</h4>
+                {Object.entries(
+                  filteredExpenses.reduce((acc, exp) => {
+                    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+                    return acc;
+                  }, {})
+                ).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([category, amount], idx) => (
+                  <div key={idx} className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-slate-600">{category.replace(/_/g, ' ')}</span>
+                    <span className="font-semibold text-red-600">${amount.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
