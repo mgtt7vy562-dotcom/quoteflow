@@ -287,7 +287,8 @@ Reply to accept this quote!`;
                     { value: 'quarter_load', label: '1/4 Load' },
                     { value: 'half_load', label: '1/2 Load' },
                     { value: 'three_quarter_load', label: '3/4 Load' },
-                    { value: 'full_load', label: 'Full Load' }
+                    { value: 'full_load', label: 'Full Load' },
+                    { value: 'other', label: 'Other' }
                   ].map((option) => (
                     <Button
                       key={option.value}
@@ -309,7 +310,8 @@ Reply to accept this quote!`;
                     { value: 'household_items', label: 'Household Items' },
                     { value: 'construction_debris', label: 'Construction Debris' },
                     { value: 'outdoor_debris', label: 'Outdoor Debris' },
-                    { value: 'mixed_trash', label: 'Mixed Trash' }
+                    { value: 'mixed_trash', label: 'Mixed Trash' },
+                    { value: 'other', label: 'Other' }
                   ].map((option) => (
                     <Button
                       key={option.value}
@@ -325,7 +327,7 @@ Reply to accept this quote!`;
               </div>
 
               <div>
-                <Label>Items Description *</Label>
+                <Label>Items Description</Label>
                 <Textarea
                   value={formData.items_description}
                   onChange={(e) => setFormData({ ...formData, items_description: e.target.value })}
@@ -496,7 +498,7 @@ Reply to accept this quote!`;
             <div className="flex gap-3">
               <Button
                 onClick={handleSaveAndDownload}
-                disabled={saving || !formData.customer_name || !formData.base_price || !formData.items_description}
+                disabled={saving || !formData.customer_name || !formData.base_price}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600 h-14 text-lg font-semibold"
               >
                 {saving ? (
@@ -516,7 +518,7 @@ Reply to accept this quote!`;
             {formData.customer_email && (
               <Button
                 onClick={() => handleSendQuote('email')}
-                disabled={sending || !formData.customer_name || !formData.base_price || !formData.items_description}
+                disabled={sending || !formData.customer_name || !formData.base_price}
                 variant="outline"
                 className="w-full h-12"
               >
@@ -534,7 +536,7 @@ Reply to accept this quote!`;
             {formData.customer_phone && (
               <Button
                 onClick={() => handleSendQuote('sms')}
-                disabled={sending || !formData.customer_name || !formData.base_price || !formData.items_description}
+                disabled={sending || !formData.customer_name || !formData.base_price}
                 variant="outline"
                 className="w-full h-12"
               >

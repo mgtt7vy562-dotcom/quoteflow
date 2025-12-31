@@ -12,11 +12,15 @@ import {
   DollarSign,
   Loader2
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [quotes, setQuotes] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showGoalInput, setShowGoalInput] = useState(false);
+  const [goalAmount, setGoalAmount] = useState('');
 
   useEffect(() => {
     loadData();
@@ -37,12 +41,33 @@ export default function Dashboard() {
 
       const allQuotes = await base44.entities.Quote.list('-created_date', 50);
       setQuotes(allQuotes);
+
+      const allJobs = await base44.entities.Job.list();
+      setJobs(allJobs);
+
+      // Check if need to set goal for current month
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      if (!currentUser.revenue_goal_month || currentUser.revenue_goal_month !== currentMonth) {
+        setShowGoalInput(true);
+      }
     } catch (err) {
       window.location.href = '/LicenseEntry';
     } finally {
       setLoading(false);
     }
   };
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  
+  const completedJobsThisMonth = jobs.filter(j => {
+    if (j.status !== 'completed') return false;
+    const date = new Date(j.scheduled_date);
+    return date.toISOString().slice(0, 7) === currentMonth;
+  });
+
+  const actualRevenue = completedJobsThisMonth.reduce((sum, j) => sum + (j.total_price || 0), 0);
+  const revenueGoal = user?.monthly_revenue_goal || 0;
+  const progressPercent = revenueGoal > 0 ? Math.min((actualRevenue / revenueGoal) * 100, 100) : 0;
 
   const stats = {
     total: quotes.length,
@@ -52,6 +77,45 @@ export default function Dashboard() {
       return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     }).length,
     revenue: quotes.reduce((sum, q) => sum + (q.total || 0), 0)
+  };
+
+  const motivationalQuotes = [
+    "Every job completed is a step toward your goal! 💪",
+    "Success is the sum of small efforts repeated day in and day out.",
+    "The harder you work, the luckier you get!",
+    "Your hustle today builds tomorrow's success.",
+    "Small progress is still progress. Keep going!",
+    "Consistency beats perfection every time."
+  ];
+
+  const revenueTips = [
+    "💡 Tip: Follow up with past customers for repeat business",
+    "💡 Tip: Ask satisfied customers for referrals",
+    "💡 Tip: Offer seasonal promotions to boost bookings",
+    "💡 Tip: Respond to quotes quickly to close more deals",
+    "💡 Tip: Take great before/after photos for marketing"
+  ];
+
+  const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+  const randomTip = revenueTips[Math.floor(Math.random() * revenueTips.length)];
+
+  const handleSaveGoal = async () => {
+    const amount = parseFloat(goalAmount);
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid goal amount');
+      return;
+    }
+
+    try {
+      await base44.auth.updateMe({
+        monthly_revenue_goal: amount,
+        revenue_goal_month: currentMonth
+      });
+      setUser({ ...user, monthly_revenue_goal: amount, revenue_goal_month: currentMonth });
+      setShowGoalInput(false);
+    } catch (err) {
+      alert('Error saving goal');
+    }
   };
 
   if (loading) {
@@ -84,6 +148,75 @@ export default function Dashboard() {
             </Link>
           </div>
 
+          {/* Revenue Goal Modal */}
+          {showGoalInput && (
+            <Card className="bg-white/10 backdrop-blur border-white/20 mb-4">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2">Set Your Revenue Goal</h3>
+                <p className="text-slate-300 text-sm mb-4">What's your target for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}?</p>
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white">$</span>
+                    <Input
+                      type="number"
+                      value={goalAmount}
+                      onChange={(e) => setGoalAmount(e.target.value)}
+                      placeholder="10000"
+                      className="pl-7 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                    />
+                  </div>
+                  <Button onClick={handleSaveGoal} className="bg-emerald-500 hover:bg-emerald-600">
+                    Set Goal
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Revenue Progress */}
+          {revenueGoal > 0 && (
+            <Card className="bg-white/10 backdrop-blur border-white/20 mb-4">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-1">Monthly Revenue Goal</h3>
+                    <p className="text-sm text-slate-300">{randomQuote}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowGoalInput(true)}
+                    className="text-white/70 hover:text-white hover:bg-white/10"
+                  >
+                    Edit
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-300">Actual Revenue</span>
+                    <span className="font-semibold">${actualRevenue.toLocaleString()}</span>
+                  </div>
+                  <div className="w-full bg-white/20 rounded-full h-4 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full transition-all duration-500 flex items-center justify-end pr-2"
+                      style={{ width: `${progressPercent}%` }}
+                    >
+                      {progressPercent > 15 && (
+                        <span className="text-xs font-bold text-white">{progressPercent.toFixed(0)}%</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-300">Goal</span>
+                    <span className="font-semibold">${revenueGoal.toLocaleString()}</span>
+                  </div>
+                  <div className="text-sm text-slate-300 mt-3 bg-white/10 rounded-lg p-3">
+                    {randomTip}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="bg-white/10 backdrop-blur border-white/20">
@@ -102,8 +235,8 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-300 text-sm">This Month</p>
-                    <p className="text-3xl font-bold mt-1">{stats.thisMonth}</p>
+                    <p className="text-slate-300 text-sm">Completed Jobs</p>
+                    <p className="text-3xl font-bold mt-1">{completedJobsThisMonth.length}</p>
                   </div>
                   <Calendar className="w-10 h-10 text-blue-400" />
                 </div>
@@ -114,7 +247,7 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-300 text-sm">Total Value</p>
+                    <p className="text-slate-300 text-sm">All-Time Value</p>
                     <p className="text-3xl font-bold mt-1">${stats.revenue.toLocaleString()}</p>
                   </div>
                   <DollarSign className="w-10 h-10 text-yellow-400" />
