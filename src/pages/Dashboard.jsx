@@ -408,6 +408,24 @@ export default function Dashboard() {
             </Card>
           </Link>
 
+          {user?.role === 'admin' && (
+            <Link to="/Admin">
+              <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-slate-500 bg-gradient-to-br from-slate-50 to-white">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-slate-500 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-500/30">
+                      <Settings className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">Admin Dashboard</h3>
+                      <p className="text-slate-600">Manage subscribers & revenue</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+
           <Link to="/CustomerPortal">
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-indigo-500 bg-gradient-to-br from-indigo-50 to-white">
               <CardContent className="p-6">
