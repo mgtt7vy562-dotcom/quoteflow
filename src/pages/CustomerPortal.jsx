@@ -8,6 +8,7 @@ import UpcomingJobs from '../components/portal/UpcomingJobs';
 import InvoicesList from '../components/portal/InvoicesList';
 import RequestQuote from '../components/portal/RequestQuote';
 import ProfileManager from '../components/portal/ProfileManager';
+import LoyaltyStatus from '../components/portal/LoyaltyStatus';
 
 export default function CustomerPortal() {
   const [user, setUser] = useState(null);
@@ -27,15 +28,6 @@ export default function CustomerPortal() {
       const customers = await base44.entities.Customer.filter({ 
         email: currentUser.email 
       });
-      if (customers.length > 0) {
-        setCustomer(customers[0]);
-      }
-
-      // Find customer record by email
-      const customers = await base44.entities.Customer.filter({ 
-        email: currentUser.email 
-      });
-
       if (customers.length > 0) {
         setCustomer(customers[0]);
       }
@@ -79,6 +71,10 @@ export default function CustomerPortal() {
       </div>
 
       <div className="max-w-6xl mx-auto p-4 md:p-8">
+        {customer && (
+          <LoyaltyStatus customer={customer} />
+        )}
+        
         <Tabs defaultValue="upcoming" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 h-auto">
             <TabsTrigger value="upcoming" className="flex items-center gap-2 py-3">
