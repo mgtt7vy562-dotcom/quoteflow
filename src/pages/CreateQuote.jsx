@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +25,7 @@ import SignaturePad from '../components/quote/SignaturePad';
 import { JunkRemovalFields, LawnCareFields, ResidentialCleaningFields } from '../components/quote/ServiceFields';
 
 export default function CreateQuote() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,7 +57,7 @@ export default function CreateQuote() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+        navigate(createPageUrl('LicenseEntry'));
         return;
       }
       setUser(currentUser);
@@ -67,7 +70,7 @@ export default function CreateQuote() {
         setFormData(prev => ({ ...prev, tax_rate: currentUser.default_tax_rate }));
       }
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      navigate(createPageUrl('LicenseEntry'));
     } finally {
       setLoading(false);
     }
@@ -180,7 +183,7 @@ export default function CreateQuote() {
 
       // Redirect to history
       setTimeout(() => {
-        window.location.href = '/QuoteHistory';
+        navigate(createPageUrl('QuoteHistory'));
       }, 500);
     } catch (err) {
       alert('Error saving quote');
@@ -255,7 +258,7 @@ Reply to accept this quote!`;
         alert(`SMS sending ready! Send this to ${formData.customer_phone}:\n\n${message}`);
       }
 
-      window.location.href = '/QuoteHistory';
+      navigate(createPageUrl('QuoteHistory'));
     } catch (err) {
       alert('Error sending quote');
       setSending(false);
@@ -402,10 +405,10 @@ Provide realistic pricing for a professional residential cleaning service.`;
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-4xl mx-auto">
-          <a href="/Dashboard" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <Link to={createPageUrl('Dashboard')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
-          </a>
+          </Link>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <FileText className="w-8 h-8" />
             Create New Quote

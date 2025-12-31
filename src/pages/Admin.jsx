@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +23,7 @@ import EmailBroadcast from '../components/admin/EmailBroadcast.jsx';
 import SalesTaxCalculator from '../components/admin/SalesTaxCalculator.jsx';
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ export default function Admin() {
       
       // Only admins can access this page
       if (currentUser.role !== 'admin') {
-        window.location.href = '/Dashboard';
+        navigate(createPageUrl('Dashboard'));
         return;
       }
       
@@ -45,7 +48,7 @@ export default function Admin() {
       const allUsers = await base44.entities.User.list('-created_date');
       setUsers(allUsers);
     } catch (err) {
-      window.location.href = '/Landing';
+      navigate(createPageUrl('Landing'));
     } finally {
       setLoading(false);
     }
@@ -91,10 +94,10 @@ export default function Admin() {
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-8 px-4 shadow-xl">
         <div className="max-w-6xl mx-auto">
-          <a href="/Dashboard" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <Link to={createPageUrl('Dashboard')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
-          </a>
+          </Link>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Shield className="w-8 h-8" />
             Admin Dashboard
