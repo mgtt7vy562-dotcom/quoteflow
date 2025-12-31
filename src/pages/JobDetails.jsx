@@ -14,9 +14,11 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
-  Camera
+  Camera,
+  DollarSign
 } from 'lucide-react';
 import PhotoUploader from '../components/quote/PhotoUploader';
+import AIJobUpsells from '../components/jobs/AIJobUpsells';
 
 export default function JobDetails() {
   const [user, setUser] = useState(null);
@@ -256,6 +258,21 @@ export default function JobDetails() {
                 />
               </CardContent>
             </Card>
+
+            {/* AI Upsell Recommendations */}
+            {job.status === 'in_progress' && (
+              <Card className="shadow-lg border-2 border-purple-200">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
+                  <CardTitle className="flex items-center gap-2 text-purple-900">
+                    <DollarSign className="w-5 h-5" />
+                    AI Upsell Opportunities
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <AIJobUpsells job={job} />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Completion Notes */}
             {job.status !== 'cancelled' && (
