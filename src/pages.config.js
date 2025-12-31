@@ -13,6 +13,7 @@ import PaymentPage from './pages/PaymentPage';
 import QuoteHistory from './pages/QuoteHistory';
 import ScheduleJob from './pages/ScheduleJob';
 import Settings from './pages/Settings';
+import ServiceSelection from './pages/ServiceSelection';
 
 
 export const PAGES = {
@@ -31,6 +32,7 @@ export const PAGES = {
     "QuoteHistory": QuoteHistory,
     "ScheduleJob": ScheduleJob,
     "Settings": Settings,
+    "ServiceSelection": ServiceSelection,
 }
 
 export const pagesConfig = {

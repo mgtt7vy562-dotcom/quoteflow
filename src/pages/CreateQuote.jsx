@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import QuotePDFGenerator from '../components/quote/QuotePDFGenerator';
 import SignaturePad from '../components/quote/SignaturePad';
+import { JunkRemovalFields, LawnCareFields, ResidentialCleaningFields } from '../components/quote/ServiceFields';
 
 export default function CreateQuote() {
   const [user, setUser] = useState(null);
@@ -422,52 +423,15 @@ Provide realistic pricing for a professional junk removal service.`,
               <CardTitle>Job Details</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              <div>
-                <Label>Load Size *</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                  {[
-                    { value: 'minimum_pickup', label: 'Minimum Pickup' },
-                    { value: 'quarter_load', label: '1/4 Load' },
-                    { value: 'half_load', label: '1/2 Load' },
-                    { value: 'three_quarter_load', label: '3/4 Load' },
-                    { value: 'full_load', label: 'Full Load' },
-                    { value: 'other', label: 'Other' }
-                  ].map((option) => (
-                    <Button
-                      key={option.value}
-                      type="button"
-                      variant={formData.load_size === option.value ? 'default' : 'outline'}
-                      onClick={() => setFormData({ ...formData, load_size: option.value })}
-                      className={formData.load_size === option.value ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label>Type of Debris *</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {[
-                    { value: 'household_items', label: 'Household Items' },
-                    { value: 'construction_debris', label: 'Construction Debris' },
-                    { value: 'outdoor_debris', label: 'Outdoor Debris' },
-                    { value: 'mixed_trash', label: 'Mixed Trash' },
-                    { value: 'other', label: 'Other' }
-                  ].map((option) => (
-                    <Button
-                      key={option.value}
-                      type="button"
-                      variant={formData.debris_type === option.value ? 'default' : 'outline'}
-                      onClick={() => setFormData({ ...formData, debris_type: option.value })}
-                      className={formData.debris_type === option.value ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+              {user?.service_type === 'junk_removal' && (
+                <JunkRemovalFields formData={formData} setFormData={setFormData} />
+              )}
+              {user?.service_type === 'lawn_care' && (
+                <LawnCareFields formData={formData} setFormData={setFormData} />
+              )}
+              {user?.service_type === 'residential_cleaning' && (
+                <ResidentialCleaningFields formData={formData} setFormData={setFormData} />
+              )}
 
               <div>
                 <div className="flex items-center justify-between mb-2">

@@ -32,6 +32,12 @@ export default function Dashboard() {
     try {
       const currentUser = await base44.auth.me();
       
+      // Check if service type is selected
+      if (!currentUser.service_type) {
+        window.location.href = '/ServiceSelection';
+        return;
+      }
+      
       // Check subscription status
       const hasAccess = currentUser.subscription_status === 'trial' || 
                         currentUser.subscription_status === 'active';

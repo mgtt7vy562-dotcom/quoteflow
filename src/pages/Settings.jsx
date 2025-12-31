@@ -20,6 +20,7 @@ export default function Settings() {
   const [uploading, setUploading] = useState(false);
   
   const [formData, setFormData] = useState({
+    service_type: '',
     company_name: '',
     phone: '',
     address: '',
@@ -44,6 +45,7 @@ export default function Settings() {
       }
       setUser(currentUser);
       setFormData({
+        service_type: currentUser.service_type || '',
         company_name: currentUser.company_name || '',
         phone: currentUser.phone || '',
         address: currentUser.address || '',
@@ -120,6 +122,29 @@ export default function Settings() {
 
       <div className="max-w-4xl mx-auto p-4 md:p-8">
         <div className="space-y-6">
+          {/* Service Type */}
+          <Card className="shadow-lg border-2 border-emerald-200">
+            <CardHeader className="bg-emerald-50 border-b">
+              <CardTitle>Service Type</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <Label>Your Business Type</Label>
+              <select
+                value={formData.service_type}
+                onChange={(e) => setFormData({ ...formData, service_type: e.target.value })}
+                className="mt-2 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="">Select service type...</option>
+                <option value="junk_removal">Junk Removal</option>
+                <option value="lawn_care">Lawn Care</option>
+                <option value="residential_cleaning">Residential Cleaning</option>
+              </select>
+              <p className="text-xs text-slate-500 mt-2">
+                💡 This customizes your quote fields and templates
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Company Info */}
           <Card className="shadow-lg">
             <CardHeader className="bg-slate-50 border-b">
