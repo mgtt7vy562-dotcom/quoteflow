@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 import { 
   Plus, 
   FileText, 
@@ -518,7 +520,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {quotes.slice(0, 5).map((quote) => (
-                  <Link key={quote.id} to="/QuoteHistory">
+                  <Link key={quote.id} to={createPageUrl('QuoteHistory')} className="block">
                     <div className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2">

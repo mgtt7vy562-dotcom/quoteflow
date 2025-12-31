@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -166,10 +168,10 @@ We'll see you then! Reply if you need to reschedule.`;
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-7xl mx-auto">
-          <a href="/Dashboard" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <Link to={createPageUrl('Dashboard')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
-          </a>
+          </Link>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <CalendarIcon className="w-8 h-8" />
@@ -194,11 +196,11 @@ We'll see you then! Reply if you need to reschedule.`;
                   </>
                 )}
               </Button>
-              <a href="/ScheduleJob" className="w-full sm:w-auto">
+              <Link to={createPageUrl('ScheduleJob')} className="w-full sm:w-auto">
                 <Button className="bg-emerald-500 hover:bg-emerald-600 w-full">
                   Schedule New Job
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -244,12 +246,12 @@ We'll see you then! Reply if you need to reschedule.`;
                         </div>
                         <div className="space-y-1">
                           {dayJobs.map(job => (
-                            <a key={job.id} href={`/JobDetails?id=${job.id}`}>
+                            <Link key={job.id} to={createPageUrl(`JobDetails?id=${job.id}`)} className="block">
                               <div className="text-xs bg-blue-100 text-blue-700 p-1 rounded cursor-pointer hover:bg-blue-200">
                                 <div className="font-medium truncate">{job.customer_name}</div>
                                 <div className="text-blue-600">{job.scheduled_time}</div>
                               </div>
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </>
@@ -274,7 +276,7 @@ We'll see you then! Reply if you need to reschedule.`;
                   .slice(0, 5)
                   .map(job => (
                     <div key={job.id} className="p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all">
-                      <a href={`/JobDetails?id=${job.id}`}>
+                      <Link to={createPageUrl(`JobDetails?id=${job.id}`)}>
                         <div className="mb-3">
                           <div className="flex items-center gap-2 mb-2">
                             <User className="w-4 h-4 text-slate-400" />
@@ -298,8 +300,8 @@ We'll see you then! Reply if you need to reschedule.`;
                             )}
                           </div>
                           <p className="font-bold text-emerald-600 mt-2">${job.total_price?.toLocaleString()}</p>
-                        </div>
-                      </a>
+                          </div>
+                          </Link>
                       <div className="flex gap-2">
                         {job.status === 'scheduled' && (
                           <Button
