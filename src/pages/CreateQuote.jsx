@@ -29,6 +29,7 @@ export default function CreateQuote() {
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [sending, setSending] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
   
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -57,6 +58,9 @@ export default function CreateQuote() {
         return;
       }
       setUser(currentUser);
+      
+      // Set default service to user's primary service
+      setSelectedService(currentUser.service_type);
       
       // Set default tax rate from user settings
       if (currentUser.default_tax_rate) {
@@ -126,6 +130,7 @@ export default function CreateQuote() {
       
       const quoteData = {
         ...formData,
+        service_type: selectedService,
         quote_number: quoteNumber,
         base_price: parseFloat(formData.base_price) || 0,
         tax_rate: parseFloat(formData.tax_rate) || 0,
@@ -142,11 +147,17 @@ export default function CreateQuote() {
       });
       
       if (customers.length > 0) {
-        // Update existing customer
+        // Update existing customer and add service to their list
+        const existingServices = customers[0].services_used || [];
+        const updatedServices = existingServices.includes(selectedService) 
+          ? existingServices 
+          : [...existingServices, selectedService];
+        
         await base44.entities.Customer.update(customers[0].id, {
           email: formData.customer_email || customers[0].email,
           phone: formData.customer_phone || customers[0].phone,
-          address: formData.customer_address || customers[0].address
+          address: formData.customer_address || customers[0].address,
+          services_used: updatedServices
         });
       } else {
         // Create new customer
@@ -156,7 +167,8 @@ export default function CreateQuote() {
           phone: formData.customer_phone,
           address: formData.customer_address,
           total_jobs: 0,
-          total_revenue: 0
+          total_revenue: 0,
+          services_used: [selectedService]
         });
       }
       
@@ -189,6 +201,7 @@ export default function CreateQuote() {
       
       const quoteData = {
         ...formData,
+        service_type: selectedService,
         quote_number: quoteNumber,
         base_price: parseFloat(formData.base_price) || 0,
         tax_rate: parseFloat(formData.tax_rate) || 0,
@@ -275,7 +288,7 @@ Reply to accept this quote!`;
     try {
       let prompt = '';
       
-      if (user.service_type === 'junk_removal') {
+      if (selectedService === 'junk_removal') {
         prompt = `You are a junk removal pricing expert. Analyze this job description and provide detailed estimates.
 
 Job Description: "${formData.items_description}"
@@ -291,7 +304,7 @@ Based on this, estimate:
 8. Notes: Brief explanation of pricing and any considerations
 
 Provide realistic pricing for a professional junk removal service.`;
-      } else if (user.service_type === 'lawn_care') {
+      } else if (selectedService === 'lawn_care') {
         prompt = `You are a lawn care pricing expert. Analyze this job description and provide detailed estimates.
 
 Job Description: "${formData.items_description}"
@@ -402,6 +415,50 @@ Provide realistic pricing for a professional residential cleaning service.`;
 
       <div className="max-w-4xl mx-auto p-4 md:p-8">
         <div className="space-y-6">
+          {/* Service Type Selector */}
+          <Card className="shadow-lg border-2 border-emerald-500">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <Label className="text-lg font-semibold">Quote Service Type</Label>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Primary: <span className="font-medium">
+                      {user?.service_type === 'junk_removal' && '🗑️ Junk Removal'}
+                      {user?.service_type === 'lawn_care' && '🌱 Lawn Care'}
+                      {user?.service_type === 'residential_cleaning' && '✨ Cleaning'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <Button
+                  type="button"
+                  variant={selectedService === 'junk_removal' ? 'default' : 'outline'}
+                  onClick={() => setSelectedService('junk_removal')}
+                  className={selectedService === 'junk_removal' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+                >
+                  🗑️ Junk Removal
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedService === 'lawn_care' ? 'default' : 'outline'}
+                  onClick={() => setSelectedService('lawn_care')}
+                  className={selectedService === 'lawn_care' ? 'bg-green-500 hover:bg-green-600' : ''}
+                >
+                  🌱 Lawn Care
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedService === 'residential_cleaning' ? 'default' : 'outline'}
+                  onClick={() => setSelectedService('residential_cleaning')}
+                  className={selectedService === 'residential_cleaning' ? 'bg-blue-500 hover:bg-blue-600' : ''}
+                >
+                  ✨ Cleaning
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Customer Info */}
           <Card className="shadow-lg">
             <CardHeader className="bg-slate-50 border-b">
@@ -458,22 +515,22 @@ Provide realistic pricing for a professional residential cleaning service.`;
               <CardTitle>Job Details</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
-              {user?.service_type === 'junk_removal' && (
+              {selectedService === 'junk_removal' && (
                 <JunkRemovalFields formData={formData} setFormData={setFormData} />
               )}
-              {user?.service_type === 'lawn_care' && (
+              {selectedService === 'lawn_care' && (
                 <LawnCareFields formData={formData} setFormData={setFormData} />
               )}
-              {user?.service_type === 'residential_cleaning' && (
+              {selectedService === 'residential_cleaning' && (
                 <ResidentialCleaningFields formData={formData} setFormData={setFormData} />
               )}
 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <Label>
-                    {user?.service_type === 'junk_removal' && 'Items Description'}
-                    {user?.service_type === 'lawn_care' && 'Job Description'}
-                    {user?.service_type === 'residential_cleaning' && 'Cleaning Details'}
+                    {selectedService === 'junk_removal' && 'Items Description'}
+                    {selectedService === 'lawn_care' && 'Job Description'}
+                    {selectedService === 'residential_cleaning' && 'Cleaning Details'}
                   </Label>
                   <Button
                     type="button"
@@ -500,9 +557,9 @@ Provide realistic pricing for a professional residential cleaning service.`;
                   value={formData.items_description}
                   onChange={(e) => setFormData({ ...formData, items_description: e.target.value })}
                   placeholder={
-                    user?.service_type === 'junk_removal' 
+                    selectedService === 'junk_removal' 
                       ? "Be detailed: Couch, refrigerator, 3 bags of trash, old mattress, kitchen table with 4 chairs..."
-                      : user?.service_type === 'lawn_care'
+                      : selectedService === 'lawn_care'
                       ? "Describe the property: Front and backyard, overgrown grass, bushes need trimming, flower beds..."
                       : "Describe the space: Kitchen needs deep clean, 2 bathrooms standard, living areas dusting..."
                   }
