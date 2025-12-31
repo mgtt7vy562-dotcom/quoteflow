@@ -47,27 +47,35 @@ export default function LicenseEntry() {
       
       if (urlKey && urlEmail) {
         // Validate license key
-        try {
-          const keys = await base44.entities.LicenseKey.filter({ 
-            key: urlKey,
-            is_active: true 
-          });
+        const keys = await base44.entities.LicenseKey.filter({ 
+          key: urlKey,
+          is_active: true 
+        });
 
-          if (keys.length > 0 && keys[0].email.toLowerCase() === urlEmail.toLowerCase()) {
-            await base44.auth.updateMe({
-              license_key: urlKey,
-              license_validated: true
-            });
-            window.location.href = '/Dashboard';
-            return;
-          }
-        } catch (err) {
-          console.error('License validation error:', err);
+        if (keys.length > 0 && keys[0].email.toLowerCase() === urlEmail.toLowerCase()) {
+          await base44.auth.updateMe({
+            license_key: urlKey,
+            license_validated: true
+          });
+          window.location.href = '/Dashboard';
+          return;
+        } else {
+          setError('Invalid license key or email does not match');
+          setChecking(false);
+          return;
         }
       }
       
     } catch (err) {
-      // User not logged in - show form
+      // User not logged in - redirect to login if we have params
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlKey = urlParams.get('key');
+      const urlEmail = urlParams.get('email');
+      
+      if (urlKey && urlEmail) {
+        base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(urlKey)}&email=${encodeURIComponent(urlEmail)}`);
+        return;
+      }
     } finally {
       setChecking(false);
     }
