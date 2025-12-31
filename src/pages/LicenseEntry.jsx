@@ -31,38 +31,13 @@ export default function LicenseEntry() {
   }, []);
 
   const checkExistingAccess = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlKey = urlParams.get('key');
-    const urlEmail = urlParams.get('email');
+    // Check localStorage first
+    const storedKey = localStorage.getItem('license_key');
+    const storedEmail = localStorage.getItem('license_email');
     
-    // If we have license params after login, save them
-    if (urlKey && urlEmail) {
-      try {
-        const user = await base44.auth.me();
-        // User is logged in, save license to their account
-        await base44.auth.updateMe({
-          license_key: urlKey,
-          license_email: urlEmail,
-          license_validated: true
-        });
-        window.location.href = '/Dashboard';
-        return;
-      } catch (err) {
-        // Not logged in yet, redirect to login
-        base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(urlKey)}&email=${encodeURIComponent(urlEmail)}`);
-        return;
-      }
-    }
-    
-    // Check if already logged in with valid license
-    try {
-      const user = await base44.auth.me();
-      if (user.license_validated || user.subscription_status === 'active') {
-        window.location.href = '/Dashboard';
-        return;
-      }
-    } catch (err) {
-      // Not logged in, show form
+    if (storedKey && storedEmail) {
+      window.location.href = '/Dashboard';
+      return;
     }
     
     setChecking(false);
@@ -86,8 +61,28 @@ export default function LicenseEntry() {
     setError('');
     setLoading(true);
 
-    // Redirect to login first - validation happens after authentication
-    base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`);
+    try {
+      // Validate license key exists in database (public read access)
+      const keys = await base44.entities.LicenseKey.list();
+      const matchingKey = keys.find(k => 
+        k.key === licenseKey.trim() && 
+        k.is_active && 
+        k.email.toLowerCase() === email.trim().toLowerCase()
+      );
+      
+      if (matchingKey) {
+        // Store in localStorage
+        localStorage.setItem('license_key', licenseKey.trim());
+        localStorage.setItem('license_email', email.trim());
+        window.location.href = '/Dashboard';
+      } else {
+        setError('Invalid license key or email does not match');
+      }
+    } catch (err) {
+      setError('Error validating license. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (checking) {
