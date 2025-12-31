@@ -60,9 +60,21 @@ export default function LicenseEntry() {
         return;
       }
       
-      // License is valid - redirect to login to create account
-      const nextUrl = `/Dashboard?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`;
-      base44.auth.redirectToLogin(nextUrl);
+      // Check if user is already logged in
+      try {
+        const currentUser = await base44.auth.me();
+        // User is logged in - save license to their account
+        await base44.auth.updateMe({
+          license_key: licenseKey.trim(),
+          license_email: email.trim(),
+          license_validated: true
+        });
+        window.location.href = '/Dashboard';
+      } catch (err) {
+        // User not logged in - redirect to login with params
+        const nextUrl = `/Dashboard?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`;
+        base44.auth.redirectToLogin(nextUrl);
+      }
     } catch (err) {
       setError('Error validating license. Please try again.');
       setLoading(false);
