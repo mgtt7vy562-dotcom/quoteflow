@@ -33,19 +33,12 @@ export default function ScheduleJob() {
 
   const loadData = async () => {
     try {
-      const storedKey = localStorage.getItem('license_key');
-      const storedEmail = localStorage.getItem('license_email');
-      
-      if (!storedKey || !storedEmail) {
+      const currentUser = await base44.auth.me();
+      if (!currentUser.license_validated) {
         window.location.href = '/LicenseEntry';
         return;
       }
-      
-      setUser({
-        email: storedEmail,
-        company_name: 'Quote Generator',
-        license_validated: true
-      });
+      setUser(currentUser);
 
       const allQuotes = await base44.entities.Quote.filter({ status: 'accepted' });
       setQuotes(allQuotes);
