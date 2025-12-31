@@ -85,6 +85,20 @@ export default function Calendar() {
     }
   };
 
+  const deleteJob = async (jobId) => {
+    if (!confirm('Are you sure you want to delete this job?')) {
+      return;
+    }
+    
+    try {
+      await base44.entities.Job.delete(jobId);
+      await loadData();
+      alert('Job deleted successfully!');
+    } catch (err) {
+      alert('Error deleting job: ' + err.message);
+    }
+  };
+
   const sendJobReminder = async (job) => {
     if (!job.customer_phone && !job.customer_email) {
       alert('No contact info for this customer');
