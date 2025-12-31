@@ -30,42 +30,16 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      // Check for license in URL params (for public app access)
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('key');
-      const urlEmail = urlParams.get('email');
+      const currentUser = await base44.auth.me();
 
-      if (urlKey && urlEmail) {
-        // Validate license for public access
-        const keys = await base44.entities.LicenseKey.list();
-        const matchingKey = keys.find(k => 
-          k.key === urlKey && 
-          k.is_active && 
-          k.email.toLowerCase() === urlEmail.toLowerCase()
-        );
+      // Check if user has valid access (license OR subscription)
+      const hasAccess = currentUser.license_validated || currentUser.subscription_status === 'active';
 
-        if (!matchingKey) {
-          window.location.href = '/LicenseEntry';
-          return;
-        }
-
-        // Create a pseudo-user object for public access
-        setUser({
-          email: urlEmail,
-          company_name: 'Quote Generator',
-          license_validated: true
-        });
-      } else {
-        // Try authenticated user
-        const currentUser = await base44.auth.me();
-        const hasAccess = currentUser.license_validated || currentUser.subscription_status === 'active';
-
-        if (!hasAccess) {
-          window.location.href = '/LicenseEntry';
-          return;
-        }
-        setUser(currentUser);
+      if (!hasAccess) {
+        window.location.href = '/LicenseEntry';
+        return;
       }
+      setUser(currentUser);
 
       const allQuotes = await base44.entities.Quote.list('-created_date', 50);
       setQuotes(allQuotes);

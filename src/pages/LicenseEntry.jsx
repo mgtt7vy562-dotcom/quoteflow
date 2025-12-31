@@ -35,34 +35,26 @@ export default function LicenseEntry() {
     const urlKey = urlParams.get('key');
     const urlEmail = urlParams.get('email');
     
-    // If we have license params, validate and proceed
+    // If we have license params after login, save them
     if (urlKey && urlEmail) {
       try {
-        // Check if the license key exists and matches email
-        const keys = await base44.entities.LicenseKey.list();
-        const matchingKey = keys.find(k => 
-          k.key === urlKey && 
-          k.is_active && 
-          k.email.toLowerCase() === urlEmail.toLowerCase()
-        );
-        
-        if (matchingKey) {
-          // Valid license - redirect to dashboard (login not required for public app)
-          window.location.href = '/Dashboard';
-          return;
-        } else {
-          setError('Invalid license key or email does not match');
-          setChecking(false);
-          return;
-        }
+        const user = await base44.auth.me();
+        // User is logged in, save license to their account
+        await base44.auth.updateMe({
+          license_key: urlKey,
+          license_email: urlEmail,
+          license_validated: true
+        });
+        window.location.href = '/Dashboard';
+        return;
       } catch (err) {
-        setError('Error validating license key');
-        setChecking(false);
+        // Not logged in yet, redirect to login
+        base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(urlKey)}&email=${encodeURIComponent(urlEmail)}`);
         return;
       }
     }
     
-    // Try to get user if logged in
+    // Check if already logged in with valid license
     try {
       const user = await base44.auth.me();
       if (user.license_validated || user.subscription_status === 'active') {
@@ -70,7 +62,7 @@ export default function LicenseEntry() {
         return;
       }
     } catch (err) {
-      // Not logged in, that's ok for public app
+      // Not logged in, show form
     }
     
     setChecking(false);
