@@ -272,62 +272,48 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Total Revenue</p>
-                  <p className="text-2xl font-bold text-emerald-600">${totalRevenue.toLocaleString()}</p>
-                </div>
-                <DollarSign className="w-10 h-10 text-emerald-400" />
+        {/* Profit Breakdown */}
+        <Card className="shadow-lg mb-6">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              Profit & Revenue Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
+                <span className="font-medium text-slate-700">Gross Revenue (Jobs)</span>
+                <span className="text-xl font-bold text-emerald-600">${totalRevenue.toLocaleString()}</span>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Total Expenses</p>
-                  <p className="text-2xl font-bold text-red-600">${totalExpenses.toLocaleString()}</p>
-                </div>
-                <TrendingUp className="w-10 h-10 text-red-400" />
+              <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                <span className="font-medium text-slate-700">Total Expenses</span>
+                <span className="text-xl font-bold text-red-600">-${totalExpenses.toLocaleString()}</span>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Net Profit</p>
-                  <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ${totalProfit.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">{profitMargin}% margin</p>
+              <div className="h-px bg-slate-200"></div>
+              <div className={`flex justify-between items-center p-4 rounded-lg ${totalProfit >= 0 ? 'bg-gradient-to-r from-emerald-50 to-emerald-100' : 'bg-gradient-to-r from-red-50 to-red-100'}`}>
+                <span className="font-semibold text-slate-900">Net Profit</span>
+                <div className="text-right">
+                  <div className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    ${Math.abs(totalProfit).toLocaleString()}
+                  </div>
+                  <div className={`text-sm ${totalProfit >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                    {profitMargin}% profit margin
+                  </div>
                 </div>
-                <Award className="w-10 h-10 text-yellow-400" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Completed Jobs</p>
-                  <p className="text-2xl font-bold text-blue-600">{filteredJobs.length}</p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    ${filteredJobs.length > 0 ? (totalRevenue / filteredJobs.length).toFixed(0) : 0} avg
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span className="font-medium text-slate-700">Completed Jobs</span>
+                <div className="text-right">
+                  <span className="text-xl font-bold text-blue-600">{filteredJobs.length}</span>
+                  <p className="text-xs text-slate-600">
+                    ${filteredJobs.length > 0 ? (totalRevenue / filteredJobs.length).toFixed(0) : 0} avg per job
                   </p>
                 </div>
-                <Package className="w-10 h-10 text-blue-400" />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Revenue & Profit Trend */}
         <Card className="shadow-lg mb-6">
