@@ -26,7 +26,8 @@ export default function Settings() {
     logo_url: '',
     stripe_publishable_key: '',
     stripe_account_id: '',
-    google_business_url: ''
+    google_business_url: '',
+    default_tax_rate: ''
   });
 
   useEffect(() => {
@@ -48,7 +49,8 @@ export default function Settings() {
         logo_url: currentUser.logo_url || '',
         stripe_publishable_key: currentUser.stripe_publishable_key || '',
         stripe_account_id: currentUser.stripe_account_id || '',
-        google_business_url: currentUser.google_business_url || ''
+        google_business_url: currentUser.google_business_url || '',
+        default_tax_rate: currentUser.default_tax_rate || ''
       });
     } catch (err) {
       window.location.href = '/LicenseEntry';
@@ -162,6 +164,24 @@ export default function Settings() {
                 />
                 <p className="text-xs text-slate-500 mt-1">
                   💡 Used in automated follow-up emails to collect reviews
+                </p>
+              </div>
+
+              <div>
+                <Label>Default Tax Rate (%)</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={formData.default_tax_rate}
+                    onChange={(e) => setFormData({ ...formData, default_tax_rate: e.target.value })}
+                    placeholder="7.5"
+                    className="mt-1 pr-8"
+                  />
+                  <span className="absolute right-3 top-1/2 translate-y-[-10%] text-slate-500">%</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Auto-fills on new quotes (varies by state)
                 </p>
               </div>
             </CardContent>

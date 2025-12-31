@@ -37,7 +37,7 @@ export default function CreateQuote() {
     items_description: '',
     base_price: '',
     fees: [],
-    taxes: '',
+    tax_rate: '',
     notes: '',
     signature_url: ''
   });
@@ -86,8 +86,20 @@ export default function CreateQuote() {
     const feesTotal = formData.fees.reduce((sum, fee) => {
       return sum + (parseFloat(fee.amount) || 0);
     }, 0);
-    const taxes = parseFloat(formData.taxes) || 0;
-    return base + feesTotal + taxes;
+    const subtotal = base + feesTotal;
+    const taxRate = parseFloat(formData.tax_rate) || 0;
+    const taxes = (subtotal * taxRate) / 100;
+    return subtotal + taxes;
+  };
+
+  const calculateTaxAmount = () => {
+    const base = parseFloat(formData.base_price) || 0;
+    const feesTotal = formData.fees.reduce((sum, fee) => {
+      return sum + (parseFloat(fee.amount) || 0);
+    }, 0);
+    const subtotal = base + feesTotal;
+    const taxRate = parseFloat(formData.tax_rate) || 0;
+    return (subtotal * taxRate) / 100;
   };
 
   const generateQuoteNumber = () => {
@@ -108,6 +120,8 @@ export default function CreateQuote() {
         ...formData,
         quote_number: quoteNumber,
         base_price: parseFloat(formData.base_price) || 0,
+        tax_rate: parseFloat(formData.tax_rate) || 0,
+        taxes: calculateTaxAmount(),
         total: total,
         status: formData.signature_url ? 'accepted' : 'draft'
       };
@@ -145,6 +159,8 @@ export default function CreateQuote() {
         ...formData,
         quote_number: quoteNumber,
         base_price: parseFloat(formData.base_price) || 0,
+        tax_rate: parseFloat(formData.tax_rate) || 0,
+        taxes: calculateTaxAmount(),
         total: total,
         status: 'sent'
       };
@@ -407,17 +423,21 @@ Reply to accept this quote!`;
               </div>
 
               <div>
-                <Label>Taxes</Label>
+                <Label>Tax Rate (%)</Label>
                 <div className="relative mt-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                   <Input
                     type="number"
-                    value={formData.taxes}
-                    onChange={(e) => setFormData({ ...formData, taxes: e.target.value })}
-                    placeholder="0.00"
-                    className="pl-7"
+                    step="0.1"
+                    value={formData.tax_rate}
+                    onChange={(e) => setFormData({ ...formData, tax_rate: e.target.value })}
+                    placeholder="7.5"
+                    className="pr-8"
                   />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">%</span>
                 </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Set your default rate in Settings
+                </p>
               </div>
 
               <div className="pt-4 border-t">
@@ -432,10 +452,10 @@ Reply to accept this quote!`;
                       <span>${formData.fees.reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0).toFixed(2)}</span>
                     </div>
                   )}
-                  {parseFloat(formData.taxes) > 0 && (
+                  {parseFloat(formData.tax_rate) > 0 && (
                     <div className="flex justify-between">
-                      <span>Taxes:</span>
-                      <span>${parseFloat(formData.taxes).toFixed(2)}</span>
+                      <span>Tax ({formData.tax_rate}%):</span>
+                      <span>${calculateTaxAmount().toFixed(2)}</span>
                     </div>
                   )}
                 </div>
