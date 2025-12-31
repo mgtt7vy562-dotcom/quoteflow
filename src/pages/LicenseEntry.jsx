@@ -198,7 +198,7 @@ export default function LicenseEntry() {
                     <p className="text-sm text-slate-400">Pay as you go</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">$29</p>
+                    <p className="text-3xl font-bold text-white">$12</p>
                     <p className="text-sm text-slate-400">/month</p>
                   </div>
                 </div>
@@ -227,7 +227,7 @@ export default function LicenseEntry() {
               {/* Yearly Plan */}
               <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border-2 border-emerald-500 rounded-xl p-5 relative">
                 <div className="absolute -top-3 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  SAVE $49
+                  SAVE $25
                 </div>
                 <div className="flex items-start justify-between mb-3">
                   <div>
@@ -235,7 +235,7 @@ export default function LicenseEntry() {
                     <p className="text-sm text-slate-400">Best value</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">$299</p>
+                    <p className="text-3xl font-bold text-white">$119</p>
                     <p className="text-sm text-slate-400">/year</p>
                   </div>
                 </div>
