@@ -31,13 +31,14 @@ export default function LicenseEntry() {
   }, []);
 
   const checkExistingAccess = async () => {
-    // Check localStorage first
-    const storedKey = localStorage.getItem('license_key');
-    const storedEmail = localStorage.getItem('license_email');
-    
-    if (storedKey && storedEmail) {
-      window.location.href = '/Dashboard';
-      return;
+    try {
+      const user = await base44.auth.me();
+      if (user.license_validated) {
+        window.location.href = '/Dashboard';
+        return;
+      }
+    } catch (err) {
+      // Not logged in yet
     }
     
     setChecking(false);
@@ -62,7 +63,7 @@ export default function LicenseEntry() {
     setLoading(true);
 
     try {
-      // Validate license key exists in database (public read access)
+      // Validate license key exists in database
       const keys = await base44.entities.LicenseKey.list();
       const matchingKey = keys.find(k => 
         k.key === licenseKey.trim() && 
@@ -70,17 +71,17 @@ export default function LicenseEntry() {
         k.email.toLowerCase() === email.trim().toLowerCase()
       );
       
-      if (matchingKey) {
-        // Store in localStorage
-        localStorage.setItem('license_key', licenseKey.trim());
-        localStorage.setItem('license_email', email.trim());
-        window.location.href = '/Dashboard';
-      } else {
+      if (!matchingKey) {
         setError('Invalid license key or email does not match');
+        setLoading(false);
+        return;
       }
+      
+      // License is valid - redirect to login to create account
+      const nextUrl = `/Dashboard?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`;
+      base44.auth.redirectToLogin(nextUrl);
     } catch (err) {
       setError('Error validating license. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
