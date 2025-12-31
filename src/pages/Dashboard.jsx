@@ -36,7 +36,7 @@ export default function Dashboard() {
       
       // Check if service type is selected
       if (!currentUser.service_type) {
-        window.location.href = '/ServiceSelection';
+        window.location.href = createPageUrl('ServiceSelection');
         return;
       }
       
@@ -45,8 +45,7 @@ export default function Dashboard() {
                         currentUser.subscription_status === 'active';
       
       if (!hasAccess) {
-        // TODO: Redirect to payment page or landing
-        window.location.href = '/Landing';
+        window.location.href = createPageUrl('Landing');
         return;
       }
 
@@ -67,7 +66,7 @@ export default function Dashboard() {
         setShowGoalInput(true);
       }
     } catch (err) {
-      window.location.href = '/Landing';
+    window.location.href = createPageUrl('Landing');
     } finally {
       setLoading(false);
     }
@@ -175,7 +174,7 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-            <Link to="/Settings">
+            <Link to={createPageUrl('Settings')}>
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
@@ -332,7 +331,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <Link to="/CreateQuote">
+          <Link to={createPageUrl('CreateQuote')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-emerald-500 bg-gradient-to-br from-emerald-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -348,7 +347,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/Calendar">
+          <Link to={createPageUrl('Calendar')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-500 bg-gradient-to-br from-blue-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -364,7 +363,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/QuoteHistory">
+          <Link to={createPageUrl('QuoteHistory')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-purple-500 bg-gradient-to-br from-purple-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -380,7 +379,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/Leads">
+          <Link to={createPageUrl('Leads')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-500 bg-gradient-to-br from-blue-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -396,7 +395,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/Customers">
+          <Link to={createPageUrl('Customers')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-orange-500 bg-gradient-to-br from-orange-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -412,7 +411,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/Analytics">
+          <Link to={createPageUrl('Analytics')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-pink-500 bg-gradient-to-br from-pink-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -428,7 +427,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/Expenses">
+          <Link to={createPageUrl('Expenses')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-red-500 bg-gradient-to-br from-red-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -445,7 +444,7 @@ export default function Dashboard() {
           </Link>
 
           {user?.role === 'admin' && (
-            <Link to="/Admin">
+            <Link to={createPageUrl('Admin')}>
               <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-slate-500 bg-gradient-to-br from-slate-50 to-white">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
@@ -462,7 +461,7 @@ export default function Dashboard() {
             </Link>
           )}
 
-          <Link to="/CustomerPortal">
+          <Link to={createPageUrl('CustomerPortal')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-indigo-500 bg-gradient-to-br from-indigo-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -478,7 +477,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to="/TeamManagement">
+          <Link to={createPageUrl('TeamManagement')}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-teal-500 bg-gradient-to-br from-teal-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">

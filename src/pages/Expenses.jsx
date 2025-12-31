@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
@@ -21,6 +23,7 @@ import QuickExpenseTemplates from '../components/expenses/QuickExpenseTemplates'
 import ReceiptScanner from '../components/expenses/ReceiptScanner';
 
 export default function Expenses() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +47,7 @@ export default function Expenses() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+        navigate(createPageUrl('LicenseEntry'));
         return;
       }
       setUser(currentUser);
@@ -52,7 +55,7 @@ export default function Expenses() {
       const allExpenses = await base44.entities.Expense.list('-date');
       setExpenses(allExpenses);
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      navigate(createPageUrl('LicenseEntry'));
     } finally {
       setLoading(false);
     }

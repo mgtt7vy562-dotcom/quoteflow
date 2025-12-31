@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
@@ -22,6 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function TeamManagement() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +53,7 @@ export default function TeamManagement() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+        navigate(createPageUrl('LicenseEntry'));
         return;
       }
       setUser(currentUser);
@@ -58,7 +61,7 @@ export default function TeamManagement() {
       const allMembers = await base44.entities.TeamMember.list('-created_date');
       setTeamMembers(allMembers);
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      navigate(createPageUrl('LicenseEntry'));
     } finally {
       setLoading(false);
     }

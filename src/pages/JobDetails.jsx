@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +28,7 @@ import AIJobUpsells from '../components/jobs/AIJobUpsells';
 import InvoicePDFGenerator from '../components/invoice/InvoicePDFGenerator';
 
 export default function JobDetails() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +47,7 @@ export default function JobDetails() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+        navigate(createPageUrl('LicenseEntry'));
         return;
       }
       setUser(currentUser);
@@ -61,7 +64,7 @@ export default function JobDetails() {
         }
       }
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      navigate(createPageUrl('LicenseEntry'));
     } finally {
       setLoading(false);
     }
@@ -255,10 +258,10 @@ Completed: ${new Date().toLocaleDateString()}`
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-6xl mx-auto">
-          <a href="/Calendar" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <Link to={createPageUrl('Calendar')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Calendar
-          </a>
+          </Link>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">{job.customer_name}</h1>
