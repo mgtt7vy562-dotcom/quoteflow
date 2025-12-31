@@ -32,45 +32,13 @@ export default function Dashboard() {
     try {
       const currentUser = await base44.auth.me();
       
-      // Check for license params (after login redirect)
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('key');
-      const urlEmail = urlParams.get('email');
-
-      // If we have license params, validate and save them
-      if (urlKey && urlEmail) {
-        try {
-          // Validate license key exists in database and matches email
-          const keys = await base44.entities.LicenseKey.list();
-          const matchingKey = keys.find(k => 
-            k.key === urlKey && 
-            k.is_active && 
-            k.email.toLowerCase() === urlEmail.toLowerCase()
-          );
-          
-          if (matchingKey) {
-            await base44.auth.updateMe({
-              license_key: urlKey,
-              license_email: urlEmail,
-              license_validated: true
-            });
-            window.history.replaceState({}, '', '/Dashboard');
-            currentUser.license_validated = true;
-          } else {
-            // Invalid license
-            window.location.href = '/LicenseEntry';
-            return;
-          }
-        } catch (err) {
-          console.error('License validation error:', err);
-          window.location.href = '/LicenseEntry';
-          return;
-        }
-      }
-
-      // Check if user has valid license
-      if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+      // Check subscription status
+      const hasAccess = currentUser.subscription_status === 'trial' || 
+                        currentUser.subscription_status === 'active';
+      
+      if (!hasAccess) {
+        // TODO: Redirect to payment page or landing
+        window.location.href = '/Landing';
         return;
       }
 
@@ -91,7 +59,7 @@ export default function Dashboard() {
         setShowGoalInput(true);
       }
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      window.location.href = '/Landing';
     } finally {
       setLoading(false);
     }

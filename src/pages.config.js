@@ -8,11 +8,11 @@ import Dashboard from './pages/Dashboard';
 import Expenses from './pages/Expenses';
 import JobDetails from './pages/JobDetails';
 import Leads from './pages/Leads';
-import LicenseEntry from './pages/LicenseEntry';
 import PaymentPage from './pages/PaymentPage';
 import QuoteHistory from './pages/QuoteHistory';
 import ScheduleJob from './pages/ScheduleJob';
 import Settings from './pages/Settings';
+import Landing from './pages/Landing';
 
 
 export const PAGES = {
@@ -26,14 +26,14 @@ export const PAGES = {
     "Expenses": Expenses,
     "JobDetails": JobDetails,
     "Leads": Leads,
-    "LicenseEntry": LicenseEntry,
     "PaymentPage": PaymentPage,
     "QuoteHistory": QuoteHistory,
     "ScheduleJob": ScheduleJob,
     "Settings": Settings,
+    "Landing": Landing,
 }
 
 export const pagesConfig = {
-    mainPage: "LicenseEntry",
+    mainPage: "Admin",
     Pages: PAGES,
 };
