@@ -31,44 +31,49 @@ export default function LicenseEntry() {
   }, []);
 
   const checkExistingAccess = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlKey = urlParams.get('key');
+    const urlEmail = urlParams.get('email');
+    
+    // If we have license params, validate and proceed
+    if (urlKey && urlEmail) {
+      try {
+        // Check if the license key exists and matches email
+        const keys = await base44.entities.LicenseKey.list();
+        const matchingKey = keys.find(k => 
+          k.key === urlKey && 
+          k.is_active && 
+          k.email.toLowerCase() === urlEmail.toLowerCase()
+        );
+        
+        if (matchingKey) {
+          // Valid license - redirect to dashboard (login not required for public app)
+          window.location.href = '/Dashboard';
+          return;
+        } else {
+          setError('Invalid license key or email does not match');
+          setChecking(false);
+          return;
+        }
+      } catch (err) {
+        setError('Error validating license key');
+        setChecking(false);
+        return;
+      }
+    }
+    
+    // Try to get user if logged in
     try {
       const user = await base44.auth.me();
-      
-      // Check if has valid license or active subscription
       if (user.license_validated || user.subscription_status === 'active') {
         window.location.href = '/Dashboard';
         return;
       }
-      
-      // Check for URL params (coming back from login)
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('key');
-      const urlEmail = urlParams.get('email');
-      
-      if (urlKey && urlEmail) {
-        // Save license key without validation (validation happens server-side)
-        await base44.auth.updateMe({
-          license_key: urlKey,
-          license_email: urlEmail,
-          license_validated: true
-        });
-        window.location.href = '/Dashboard';
-        return;
-      }
-      
     } catch (err) {
-      // User not logged in - redirect to login if we have params
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('key');
-      const urlEmail = urlParams.get('email');
-      
-      if (urlKey && urlEmail) {
-        base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(urlKey)}&email=${encodeURIComponent(urlEmail)}`);
-        return;
-      }
-    } finally {
-      setChecking(false);
+      // Not logged in, that's ok for public app
     }
+    
+    setChecking(false);
   };
 
   const handleInstallClick = async () => {
