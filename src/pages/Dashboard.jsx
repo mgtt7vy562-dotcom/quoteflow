@@ -104,6 +104,10 @@ export default function Dashboard() {
     pendingPayment: quotesThisMonth.filter(q => q.payment_status !== 'paid').length
   };
 
+  // Calculate profit metrics
+  const netProfit = actualRevenue - totalExpensesThisMonth;
+  const profitMargin = actualRevenue > 0 ? ((netProfit / actualRevenue) * 100) : 0;
+
   const motivationalQuotes = [
     "Every job completed is a step toward your goal! 💪",
     "Success is the sum of small efforts repeated day in and day out.",
@@ -250,7 +254,7 @@ export default function Dashboard() {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card className="bg-white/10 backdrop-blur border-white/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -302,12 +306,63 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+
+            <Card className={`bg-white/10 backdrop-blur border-white/20 ${netProfit >= 0 ? '' : 'border-red-400'}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-300 text-sm">Net Profit</p>
+                    <p className={`text-3xl font-bold mt-1 ${netProfit >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>
+                      ${Math.abs(netProfit).toLocaleString()}
+                    </p>
+                    <p className={`text-xs mt-1 ${profitMargin >= 0 ? 'text-emerald-200' : 'text-red-200'}`}>
+                      {profitMargin.toFixed(1)}% margin
+                    </p>
+                  </div>
+                  <TrendingUp className={`w-10 h-10 ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`} />
+                </div>
+              </CardContent>
+            </Card>
+            </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-4 md:p-8">
+        {/* Profit Breakdown */}
+        <Card className="shadow-lg mb-8">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              Profit Breakdown (This Month)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
+                <span className="font-medium text-slate-700">Gross Revenue (Jobs)</span>
+                <span className="text-xl font-bold text-emerald-600">${actualRevenue.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                <span className="font-medium text-slate-700">Total Expenses</span>
+                <span className="text-xl font-bold text-red-600">-${totalExpensesThisMonth.toLocaleString()}</span>
+              </div>
+              <div className="h-px bg-slate-200"></div>
+              <div className={`flex justify-between items-center p-4 rounded-lg ${netProfit >= 0 ? 'bg-gradient-to-r from-emerald-50 to-emerald-100' : 'bg-gradient-to-r from-red-50 to-red-100'}`}>
+                <span className="font-semibold text-slate-900">Net Profit</span>
+                <div className="text-right">
+                  <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    ${Math.abs(netProfit).toLocaleString()}
+                  </div>
+                  <div className={`text-sm ${netProfit >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                    {profitMargin.toFixed(1)}% profit margin
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Link to="/CreateQuote">
