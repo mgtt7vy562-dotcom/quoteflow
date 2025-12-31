@@ -15,7 +15,8 @@ import {
   Send,
   Mail,
   MessageSquare,
-  PenTool
+  PenTool,
+  Sparkles
 } from 'lucide-react';
 import QuotePDFGenerator from '../components/quote/QuotePDFGenerator';
 import SignaturePad from '../components/quote/SignaturePad';
@@ -26,6 +27,7 @@ export default function CreateQuote() {
   const [saving, setSaving] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [sending, setSending] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -262,6 +264,71 @@ Reply to accept this quote!`;
     }
   };
 
+  const handleAIAnalysis = async () => {
+    if (!formData.items_description || formData.items_description.trim().length < 10) {
+      alert('Please provide a detailed description of items to analyze');
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a junk removal pricing expert. Analyze this job description and provide detailed estimates.
+
+Job Description: "${formData.items_description}"
+
+Based on this, estimate:
+1. Load Size: Choose from minimum_pickup (few small items), quarter_load (1-2 large items), half_load (couch + misc), three_quarter_load (room full), full_load (entire house/garage), other
+2. Debris Type: Choose from household_items, construction_debris, outdoor_debris, mixed_trash, other
+3. Estimated Labor Hours: How many hours will this take? (0.5 to 8)
+4. Truck Trips: How many truck trips needed? (1 to 5)
+5. Base Price: Estimate fair market price based on: $75 minimum, +$50 per quarter load, +$25-50 per extra labor hour
+6. Additional Fees: List any extra fees needed (stairs $25-50, heavy items $30-75, long carry $20-40, tight access $25, hazmat extra)
+7. Notes: Brief explanation of pricing and any considerations
+
+Provide realistic pricing for a professional junk removal service.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            load_size: { type: "string" },
+            debris_type: { type: "string" },
+            labor_hours: { type: "number" },
+            truck_trips: { type: "number" },
+            base_price: { type: "number" },
+            additional_fees: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  amount: { type: "number" }
+                }
+              }
+            },
+            notes: { type: "string" }
+          }
+        }
+      });
+
+      setFormData({
+        ...formData,
+        load_size: response.load_size,
+        debris_type: response.debris_type,
+        base_price: response.base_price.toString(),
+        fees: response.additional_fees || [],
+        notes: formData.notes + (formData.notes ? '\n\n' : '') + 
+          `AI Analysis: ${response.notes}\n` +
+          `Est. Labor: ${response.labor_hours}hrs | Trips: ${response.truck_trips}`
+      });
+
+      alert('AI analysis complete! Review and adjust the estimates as needed.');
+    } catch (err) {
+      alert('Error analyzing job: ' + err.message);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -394,13 +461,38 @@ Reply to accept this quote!`;
               </div>
 
               <div>
-                <Label>Items Description</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label>Items Description</Label>
+                  <Button
+                    type="button"
+                    onClick={handleAIAnalysis}
+                    disabled={analyzing || !formData.items_description || formData.items_description.trim().length < 10}
+                    variant="outline"
+                    size="sm"
+                    className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                  >
+                    {analyzing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-1" />
+                        AI Estimate
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Textarea
                   value={formData.items_description}
                   onChange={(e) => setFormData({ ...formData, items_description: e.target.value })}
-                  placeholder="Couch, refrigerator, 3 bags of trash..."
+                  placeholder="Be detailed: Couch, refrigerator, 3 bags of trash, old mattress, kitchen table with 4 chairs..."
                   className="mt-1 h-24"
                 />
+                <p className="text-xs text-slate-500 mt-1">
+                  💡 Describe items in detail, then click "AI Estimate" to auto-generate pricing
+                </p>
               </div>
             </CardContent>
           </Card>
