@@ -78,7 +78,16 @@ export default function Dashboard() {
     if (!e.date) return false;
     return e.date.slice(0, 7) === currentMonth;
   });
-  const totalExpensesThisMonth = currentMonthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  const totalVariableExpenses = currentMonthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  
+  const totalFixedMonthly = Object.entries(user?.fixed_monthly_expenses || {}).reduce((sum, [key, value]) => {
+    if (key !== 'custom_label') {
+      return sum + (parseFloat(value) || 0);
+    }
+    return sum;
+  }, 0);
+  
+  const totalExpensesThisMonth = totalVariableExpenses + totalFixedMonthly;
 
   const stats = {
     total: quotes.length,
