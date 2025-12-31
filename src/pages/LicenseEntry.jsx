@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Key, Loader2, FileText, Zap } from 'lucide-react';
+import { Key, Loader2, FileText, Zap, Download } from 'lucide-react';
 
 export default function LicenseEntry() {
   const [licenseKey, setLicenseKey] = useState('');
@@ -12,10 +12,22 @@ export default function LicenseEntry() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
     checkExistingLicense();
+    
+    // PWA Install prompt
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+    
+    window.addEventListener('beforeinstallprompt', handler);
+    
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const checkExistingLicense = async () => {
@@ -29,6 +41,19 @@ export default function LicenseEntry() {
     } finally {
       setChecking(false);
     }
+  };
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setShowInstallButton(false);
+    }
+    
+    setDeferredPrompt(null);
   };
 
   const handleSubmit = async (e) => {
@@ -91,6 +116,17 @@ export default function LicenseEntry() {
           <h1 className="text-3xl font-bold text-white mb-2">Quote Generator</h1>
           <p className="text-slate-400">Professional quotes in seconds</p>
         </div>
+
+        {/* Install App Button */}
+        {showInstallButton && (
+          <Button
+            onClick={handleInstallClick}
+            className="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 h-12 text-base font-semibold"
+          >
+            <Download className="w-5 h-5 mr-2" />
+            Add to Home Screen
+          </Button>
+        )}
 
         {/* Features */}
         <div className="grid grid-cols-2 gap-3 mb-8">
