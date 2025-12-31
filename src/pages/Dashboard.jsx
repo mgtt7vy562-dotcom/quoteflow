@@ -370,9 +370,24 @@ export default function Dashboard() {
                 {quotes.slice(0, 5).map((quote) => (
                   <Link key={quote.id} to="/QuoteHistory">
                     <div className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-semibold text-slate-900">{quote.customer_name}</p>
                         <p className="text-sm text-slate-600">{quote.quote_number}</p>
+                        <div className="mt-1">
+                          {quote.payment_status === 'paid' ? (
+                            <span className="inline-flex items-center text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                              ✓ Paid
+                            </span>
+                          ) : quote.job_id ? (
+                            <span className="inline-flex items-center text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                              📅 Scheduled
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                              ⏳ Pending Payment
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-emerald-600">${quote.total?.toLocaleString()}</p>
