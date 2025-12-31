@@ -71,9 +71,12 @@ export default function CustomerPortal() {
       </div>
 
       <div className="max-w-6xl mx-auto p-4 md:p-8">
-        {customer && (
-          <LoyaltyStatus customer={customer} />
-        )}
+        <LoyaltyStatus customer={customer || { 
+          loyalty_tier: 'bronze', 
+          loyalty_points: 0, 
+          referrals_made: 0, 
+          email: user?.email 
+        }} />
         
         <Tabs defaultValue="upcoming" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 h-auto">
