@@ -71,13 +71,27 @@ export default function JobDetails() {
         const customers = await base44.entities.Customer.filter({ 
           name: job.customer_name 
         });
-        
+
         if (customers.length > 0) {
           const customer = customers[0];
+          const newTotalJobs = (customer.total_jobs || 0) + 1;
+          const newPoints = (customer.loyalty_points || 0) + 50;
+
+          // Bonus points for 5+ jobs
+          const bonusPoints = newTotalJobs === 5 ? 200 : 0;
+          const totalNewPoints = newPoints + bonusPoints;
+
+          // Calculate tier based on points
+          let newTier = 'bronze';
+          if (totalNewPoints >= 1000) newTier = 'gold';
+          else if (totalNewPoints >= 500) newTier = 'silver';
+
           await base44.entities.Customer.update(customer.id, {
-            total_jobs: (customer.total_jobs || 0) + 1,
+            total_jobs: newTotalJobs,
             total_revenue: (customer.total_revenue || 0) + (job.total_price || 0),
-            last_job_date: job.scheduled_date
+            last_job_date: job.scheduled_date,
+            loyalty_points: totalNewPoints,
+            loyalty_tier: newTier
           });
         } else {
           await base44.entities.Customer.create({
@@ -87,7 +101,9 @@ export default function JobDetails() {
             address: job.customer_address,
             total_jobs: 1,
             total_revenue: job.total_price || 0,
-            last_job_date: job.scheduled_date
+            last_job_date: job.scheduled_date,
+            loyalty_points: 50,
+            loyalty_tier: 'bronze'
           });
         }
         

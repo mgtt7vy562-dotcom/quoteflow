@@ -22,6 +22,14 @@ export default function CustomerPortal() {
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
+      
+      // Load customer data for loyalty info
+      const customers = await base44.entities.Customer.filter({ 
+        email: currentUser.email 
+      });
+      if (customers.length > 0) {
+        setCustomer(customers[0]);
+      }
 
       // Find customer record by email
       const customers = await base44.entities.Customer.filter({ 
