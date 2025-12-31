@@ -12,6 +12,7 @@ import QuoteHistory from './pages/QuoteHistory';
 import ScheduleJob from './pages/ScheduleJob';
 import Settings from './pages/Settings';
 import Leads from './pages/Leads';
+import CustomerPortal from './pages/CustomerPortal';
 
 
 export const PAGES = {
@@ -29,6 +30,7 @@ export const PAGES = {
     "ScheduleJob": ScheduleJob,
     "Settings": Settings,
     "Leads": Leads,
+    "CustomerPortal": CustomerPortal,
 }
 
 export const pagesConfig = {
