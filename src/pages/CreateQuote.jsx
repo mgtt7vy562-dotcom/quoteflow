@@ -133,6 +133,30 @@ export default function CreateQuote() {
 
       const savedQuote = await base44.entities.Quote.create(quoteData);
       
+      // Add/update customer in database
+      const customers = await base44.entities.Customer.filter({ 
+        name: formData.customer_name 
+      });
+      
+      if (customers.length > 0) {
+        // Update existing customer
+        await base44.entities.Customer.update(customers[0].id, {
+          email: formData.customer_email || customers[0].email,
+          phone: formData.customer_phone || customers[0].phone,
+          address: formData.customer_address || customers[0].address
+        });
+      } else {
+        // Create new customer
+        await base44.entities.Customer.create({
+          name: formData.customer_name,
+          email: formData.customer_email,
+          phone: formData.customer_phone,
+          address: formData.customer_address,
+          total_jobs: 0,
+          total_revenue: 0
+        });
+      }
+      
       // Generate PDF
       QuotePDFGenerator.generatePDF({
         ...savedQuote,
@@ -171,6 +195,28 @@ export default function CreateQuote() {
       };
 
       const savedQuote = await base44.entities.Quote.create(quoteData);
+      
+      // Add/update customer in database
+      const customers = await base44.entities.Customer.filter({ 
+        name: formData.customer_name 
+      });
+      
+      if (customers.length > 0) {
+        await base44.entities.Customer.update(customers[0].id, {
+          email: formData.customer_email || customers[0].email,
+          phone: formData.customer_phone || customers[0].phone,
+          address: formData.customer_address || customers[0].address
+        });
+      } else {
+        await base44.entities.Customer.create({
+          name: formData.customer_name,
+          email: formData.customer_email,
+          phone: formData.customer_phone,
+          address: formData.customer_address,
+          total_jobs: 0,
+          total_revenue: 0
+        });
+      }
 
       const message = `Hi ${formData.customer_name}! Here's your quote from ${user.company_name}:
 

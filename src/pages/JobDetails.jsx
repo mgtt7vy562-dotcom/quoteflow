@@ -41,10 +41,12 @@ export default function JobDetails() {
       const urlParams = new URLSearchParams(window.location.search);
       const jobId = urlParams.get('id');
       
-      const jobs = await base44.entities.Job.filter({ id: jobId });
-      if (jobs.length > 0) {
-        setJob(jobs[0]);
-        setCompletionNotes(jobs[0].completion_notes || '');
+      if (jobId) {
+        const jobs = await base44.entities.Job.filter({ id: jobId });
+        if (jobs.length > 0) {
+          setJob(jobs[0]);
+          setCompletionNotes(jobs[0].completion_notes || '');
+        }
       }
     } catch (err) {
       window.location.href = '/LicenseEntry';
@@ -62,7 +64,7 @@ export default function JobDetails() {
         completion_notes: completionNotes
       });
       
-      // Update customer record when job is completed
+      // Update customer record and send thank you when job is completed
       if (newStatus === 'completed') {
         const customers = await base44.entities.Customer.filter({ 
           name: job.customer_name 
@@ -85,6 +87,25 @@ export default function JobDetails() {
             total_revenue: job.total_price || 0,
             last_job_date: job.scheduled_date
           });
+        }
+        
+        // Send thank you message with review links
+        if (job.customer_email) {
+          let reviewLinks = '';
+          if (user.google_business_url) {
+            reviewLinks += `\n\nLeave us a Google review: ${user.google_business_url}`;
+          }
+          if (user.yelp_business_url) {
+            reviewLinks += `\n\nLeave us a Yelp review: ${user.yelp_business_url}`;
+          }
+          
+          if (reviewLinks) {
+            await base44.integrations.Core.SendEmail({
+              to: job.customer_email,
+              subject: `Thank you from ${user.company_name}!`,
+              body: `Hi ${job.customer_name},\n\nThank you for choosing ${user.company_name}! We hope you're happy with our service.\n\nIf you have a moment, we'd love it if you could leave us a review:${reviewLinks}\n\nYour feedback helps us grow and serve you better!\n\nBest regards,\n${user.company_name}`
+            });
+          }
         }
       }
       
