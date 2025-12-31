@@ -176,7 +176,24 @@ export default function QuoteHistory() {
                           <FileText className="w-6 h-6 text-emerald-600" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-slate-900">{quote.customer_name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-slate-900">{quote.customer_name}</h3>
+                            {quote.service_type === 'junk_removal' && (
+                              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                                🚛 Junk Removal
+                              </span>
+                            )}
+                            {quote.service_type === 'lawn_care' && (
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                                🌱 Lawn Care
+                              </span>
+                            )}
+                            {quote.service_type === 'residential_cleaning' && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                                ✨ Cleaning
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-slate-600">{quote.quote_number}</p>
                         </div>
                       </div>
@@ -194,11 +211,11 @@ export default function QuoteHistory() {
                         <div>
                           <p className="text-slate-500 flex items-center gap-1">
                             <FileText className="w-4 h-4" />
-                            {quote.service_type === 'junk_removal' ? 'Load Size' : 'Details'}
+                            Details
                           </p>
                           <p className="font-medium text-slate-900">
-                            {quote.service_type === 'junk_removal' && quote.load_size ? quote.load_size.replace(/_/g, ' ') : 
-                             quote.items_description ? (quote.items_description.length > 30 ? quote.items_description.substring(0, 30) + '...' : quote.items_description) :
+                            {quote.items_description ? (quote.items_description.length > 30 ? quote.items_description.substring(0, 30) + '...' : quote.items_description) :
+                             quote.service_type === 'junk_removal' && quote.load_size ? quote.load_size.replace(/_/g, ' ') : 
                              'N/A'}
                           </p>
                         </div>
