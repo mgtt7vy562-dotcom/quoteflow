@@ -23,7 +23,9 @@ export default function Settings() {
     company_name: '',
     phone: '',
     address: '',
-    logo_url: ''
+    logo_url: '',
+    stripe_publishable_key: '',
+    stripe_account_id: ''
   });
 
   useEffect(() => {
@@ -42,7 +44,9 @@ export default function Settings() {
         company_name: currentUser.company_name || '',
         phone: currentUser.phone || '',
         address: currentUser.address || '',
-        logo_url: currentUser.logo_url || ''
+        logo_url: currentUser.logo_url || '',
+        stripe_publishable_key: currentUser.stripe_publishable_key || '',
+        stripe_account_id: currentUser.stripe_account_id || ''
       });
     } catch (err) {
       window.location.href = '/LicenseEntry';
@@ -198,6 +202,39 @@ export default function Settings() {
                   </Button>
                 </label>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Stripe Settings */}
+          <Card className="shadow-lg">
+            <CardHeader className="bg-slate-50 border-b">
+              <CardTitle>Stripe Payment Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <p className="text-sm text-slate-600 mb-4">
+                Connect your Stripe account to accept payments from customers
+              </p>
+              <div>
+                <Label>Stripe Publishable Key</Label>
+                <Input
+                  value={formData.stripe_publishable_key}
+                  onChange={(e) => setFormData({ ...formData, stripe_publishable_key: e.target.value })}
+                  placeholder="pk_test_..."
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Stripe Account ID (Optional)</Label>
+                <Input
+                  value={formData.stripe_account_id}
+                  onChange={(e) => setFormData({ ...formData, stripe_account_id: e.target.value })}
+                  placeholder="acct_..."
+                  className="mt-1"
+                />
+              </div>
+              <p className="text-xs text-slate-500">
+                💡 Get your keys from <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Stripe Dashboard</a>
+              </p>
             </CardContent>
           </Card>
 
