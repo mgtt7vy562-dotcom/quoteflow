@@ -11,7 +11,8 @@ import {
   Download,
   Search,
   Calendar,
-  DollarSign
+  DollarSign,
+  Mail
 } from 'lucide-react';
 import QuotePDFGenerator from '../components/quote/QuotePDFGenerator';
 
@@ -85,6 +86,24 @@ export default function QuoteHistory() {
     } else {
       navigator.clipboard.writeText(paymentUrl);
       alert('Payment link copied to clipboard!');
+    }
+  };
+
+  const handleInviteCustomer = async (quote) => {
+    if (!quote.customer_email) {
+      alert('No email address for this customer');
+      return;
+    }
+
+    try {
+      await base44.users.inviteUser(quote.customer_email, "user");
+      alert(`Portal invitation sent to ${quote.customer_email}!`);
+    } catch (err) {
+      if (err.message.includes('already exists')) {
+        alert('Customer already has portal access');
+      } else {
+        alert('Error sending invitation: ' + err.message);
+      }
     }
   };
 
@@ -222,6 +241,17 @@ export default function QuoteHistory() {
                         >
                           <Calendar className="w-4 h-4 mr-2" />
                           Schedule
+                        </Button>
+                      )}
+                      {quote.customer_email && (
+                        <Button
+                          onClick={() => handleInviteCustomer(quote)}
+                          variant="outline"
+                          size="sm"
+                          className="border-purple-500 text-purple-600 hover:bg-purple-50"
+                        >
+                          <Mail className="w-4 h-4 mr-2" />
+                          Invite
                         </Button>
                       )}
                     </div>

@@ -50,6 +50,16 @@ export default function PaymentPage() {
         ...quote,
         payment_status: 'paid'
       });
+      
+      // Auto-invite customer to portal after payment
+      if (quote.customer_email) {
+        try {
+          await base44.users.inviteUser(quote.customer_email, "user");
+        } catch (inviteErr) {
+          // Silent fail if already invited
+        }
+      }
+      
       setPaid(true);
     } catch (err) {
       alert('Payment processing failed');
