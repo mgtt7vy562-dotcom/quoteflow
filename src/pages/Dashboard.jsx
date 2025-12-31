@@ -288,7 +288,7 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-300 text-sm">Completed Jobs</p>
+                    <p className="text-slate-300 text-sm">Jobs This Month</p>
                     <p className="text-3xl font-bold mt-1">{completedJobsThisMonth.length}</p>
                   </div>
                   <Calendar className="w-10 h-10 text-blue-400" />
