@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,6 +21,7 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import AIInsights from '../components/analytics/AIInsights';
 
 export default function Analytics() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [expenses, setExpenses] = useState([]);
@@ -41,7 +40,7 @@ export default function Analytics() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = '/LicenseEntry';
+        navigate(createPageUrl('LicenseEntry'));
         return;
       }
       setUser(currentUser);
@@ -54,7 +53,7 @@ export default function Analytics() {
       setExpenses(allExpenses);
       setCustomers(allCustomers);
     } catch (err) {
-      window.location.href = '/LicenseEntry';
+      navigate(createPageUrl('LicenseEntry'));
     } finally {
       setLoading(false);
     }
