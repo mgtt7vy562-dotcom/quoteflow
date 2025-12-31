@@ -18,8 +18,7 @@ import {
   Camera,
   DollarSign,
   Send,
-  X,
-  FileText
+  X
 } from 'lucide-react';
 import PhotoUploader from '../components/quote/PhotoUploader';
 import AIJobUpsells from '../components/jobs/AIJobUpsells';
