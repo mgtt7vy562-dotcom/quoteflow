@@ -187,7 +187,6 @@ export default function Expenses() {
                 setFormData(expense);
                 setShowForm(true);
               }}
-              serviceType={user?.service_type}
             />
           </div>
         )}

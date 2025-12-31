@@ -1,62 +1,79 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Zap } from 'lucide-react';
+import { History, Loader2 } from 'lucide-react';
 
-export default function QuickExpenseTemplates({ onAddExpense, serviceType }) {
-  const templates = {
-    junk_removal: [
-      { category: 'fuel', amount: 50, description: 'Gas fill-up' },
-      { category: 'dump_fees', amount: 75, description: 'Landfill dump fee' },
-      { category: 'equipment', amount: 200, description: 'Equipment purchase' },
-      { category: 'vehicle_maintenance', amount: 100, description: 'Truck maintenance' },
-    ],
-    lawn_care: [
-      { category: 'fuel', amount: 40, description: 'Gas for mower' },
-      { category: 'lawn_equipment', amount: 150, description: 'Equipment purchase' },
-      { category: 'fertilizer', amount: 60, description: 'Fertilizer supplies' },
-      { category: 'seeds_plants', amount: 50, description: 'Plants/seeds' },
-    ],
-    residential_cleaning: [
-      { category: 'cleaning_supplies', amount: 75, description: 'Cleaning supplies' },
-      { category: 'cleaning_equipment', amount: 150, description: 'Equipment purchase' },
-      { category: 'fuel', amount: 30, description: 'Gas for travel' },
-      { category: 'vehicle_maintenance', amount: 100, description: 'Vehicle maintenance' },
-    ],
-    common: [
-      { category: 'marketing', amount: 100, description: 'Marketing expense' },
-      { category: 'insurance', amount: 200, description: 'Insurance payment' },
-    ]
+export default function QuickExpenseTemplates({ onAddExpense }) {
+  const [recentExpenses, setRecentExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadRecentExpenses();
+  }, []);
+
+  const loadRecentExpenses = async () => {
+    try {
+      const allExpenses = await base44.entities.Expense.list('-date', 50);
+      
+      // Get unique recent expenses by category (last 5 unique categories)
+      const seen = new Set();
+      const unique = [];
+      
+      for (const expense of allExpenses) {
+        const key = `${expense.category}-${expense.description}`;
+        if (!seen.has(expense.category) && unique.length < 6) {
+          seen.add(expense.category);
+          unique.push(expense);
+        }
+      }
+      
+      setRecentExpenses(unique);
+    } catch (err) {
+      console.error('Error loading recent expenses');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const serviceTemplates = templates[serviceType] || [];
-  const allTemplates = [...serviceTemplates, ...templates.common];
-
-  const handleQuickAdd = (template) => {
+  const handleQuickAdd = (expense) => {
     const today = new Date().toISOString().split('T')[0];
     onAddExpense({
       date: today,
-      category: template.category,
-      amount: template.amount.toString(),
-      description: template.description
+      category: expense.category,
+      amount: expense.amount.toString(),
+      description: expense.description
     });
   };
 
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 border border-slate-200">
+        <Loader2 className="w-5 h-5 text-slate-400 animate-spin mx-auto" />
+      </div>
+    );
+  }
+
+  if (recentExpenses.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
       <div className="flex items-center gap-2 mb-3">
-        <Zap className="w-5 h-5 text-purple-600" />
-        <h3 className="font-semibold text-purple-900">Quick Add</h3>
+        <History className="w-5 h-5 text-blue-600" />
+        <h3 className="font-semibold text-blue-900">Recent Expenses</h3>
+        <span className="text-xs text-slate-600">(click to repeat)</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {allTemplates.map((template, idx) => (
+        {recentExpenses.map((expense, idx) => (
           <Button
             key={idx}
-            onClick={() => handleQuickAdd(template)}
+            onClick={() => handleQuickAdd(expense)}
             variant="outline"
-            className="h-auto py-2 px-3 flex flex-col items-start hover:bg-purple-100 border-purple-300"
+            className="h-auto py-2 px-3 flex flex-col items-start hover:bg-blue-100 border-blue-300 text-left"
           >
-            <span className="text-xs text-slate-600">{template.description}</span>
-            <span className="text-lg font-bold text-purple-700">${template.amount}</span>
+            <span className="text-xs text-slate-600 truncate w-full">{expense.description}</span>
+            <span className="text-lg font-bold text-blue-700">${expense.amount}</span>
           </Button>
         ))}
       </div>
