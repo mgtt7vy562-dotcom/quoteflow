@@ -170,17 +170,17 @@ We'll see you then! Reply if you need to reschedule.`;
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <CalendarIcon className="w-8 h-8" />
               Job Calendar
             </h1>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button 
                 onClick={handleImportGoogleCalendar}
                 disabled={importing}
                 variant="outline"
-                className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                className="border-blue-500 text-blue-600 hover:bg-blue-50 w-full sm:w-auto"
               >
                 {importing ? (
                   <>
@@ -190,12 +190,12 @@ We'll see you then! Reply if you need to reschedule.`;
                 ) : (
                   <>
                     <Download className="w-4 h-4 mr-2" />
-                    Import from Google Calendar
+                    Import
                   </>
                 )}
               </Button>
-              <a href="/ScheduleJob">
-                <Button className="bg-emerald-500 hover:bg-emerald-600">
+              <a href="/ScheduleJob" className="w-full sm:w-auto">
+                <Button className="bg-emerald-500 hover:bg-emerald-600 w-full">
                   Schedule New Job
                 </Button>
               </a>

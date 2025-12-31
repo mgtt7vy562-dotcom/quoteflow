@@ -131,8 +131,8 @@ export default function QuoteHistory() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <FileText className="w-8 h-8" />
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+            <FileText className="w-6 h-6 md:w-8 md:h-8" />
             Quote History
           </h1>
         </div>

@@ -226,14 +226,14 @@ export default function Analytics() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <TrendingUp className="w-8 h-8" />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+              <TrendingUp className="w-6 h-6 md:w-8 md:h-8" />
               Advanced Analytics
             </h1>
             <Button
               onClick={handleExportCSV}
-              className="bg-emerald-500 hover:bg-emerald-600"
+              className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
             >
               <Download className="w-4 h-4 mr-2" />
               Export Report
