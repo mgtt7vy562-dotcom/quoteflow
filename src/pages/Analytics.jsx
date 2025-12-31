@@ -73,22 +73,46 @@ export default function Analytics() {
   const totalProfit = totalRevenue - totalExpenses;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
 
-  // Popular Services Analysis
-  const loadSizeData = {};
-  const debrisTypeData = {};
+  // Popular Services Analysis - Service-specific
+  const primaryServiceData = {};
+  const secondaryServiceData = {};
   
   filteredJobs.forEach(job => {
-    loadSizeData[job.load_size] = (loadSizeData[job.load_size] || 0) + 1;
-    debrisTypeData[job.debris_type] = (debrisTypeData[job.debris_type] || 0) + 1;
+    if (user?.service_type === 'junk_removal') {
+      primaryServiceData[job.load_size] = (primaryServiceData[job.load_size] || 0) + 1;
+      secondaryServiceData[job.debris_type] = (secondaryServiceData[job.debris_type] || 0) + 1;
+    } else if (user?.service_type === 'lawn_care') {
+      // For lawn care, analyze services from lawn_services array
+      if (job.lawn_services && Array.isArray(job.lawn_services)) {
+        job.lawn_services.forEach(service => {
+          primaryServiceData[service] = (primaryServiceData[service] || 0) + 1;
+        });
+      }
+      // Service frequency for secondary chart
+      const freq = job.service_frequency || 'one_time';
+      secondaryServiceData[freq] = (secondaryServiceData[freq] || 0) + 1;
+    } else if (user?.service_type === 'residential_cleaning') {
+      // For cleaning, analyze by cleaning type
+      const type = job.cleaning_type || 'standard';
+      primaryServiceData[type] = (primaryServiceData[type] || 0) + 1;
+      // Frequency for secondary chart
+      const freq = job.cleaning_frequency || 'one_time';
+      secondaryServiceData[freq] = (secondaryServiceData[freq] || 0) + 1;
+    }
   });
 
-  const loadSizeChart = Object.entries(loadSizeData).map(([name, value]) => ({
+  const loadSizeChart = Object.entries(primaryServiceData).map(([name, value]) => ({
     name: name.replace(/_/g, ' ').toUpperCase(),
     jobs: value,
-    revenue: filteredJobs.filter(j => j.load_size === name).reduce((sum, j) => sum + (j.total_price || 0), 0)
+    revenue: filteredJobs.filter(j => {
+      if (user?.service_type === 'junk_removal') return j.load_size === name;
+      if (user?.service_type === 'lawn_care') return j.lawn_services?.includes(name);
+      if (user?.service_type === 'residential_cleaning') return j.cleaning_type === name;
+      return false;
+    }).reduce((sum, j) => sum + (j.total_price || 0), 0)
   }));
 
-  const debrisTypeChart = Object.entries(debrisTypeData).map(([name, value]) => ({
+  const debrisTypeChart = Object.entries(secondaryServiceData).map(([name, value]) => ({
     name: name.replace(/_/g, ' ').toUpperCase(),
     value: value
   }));
@@ -327,10 +351,14 @@ export default function Analytics() {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Popular Load Sizes */}
+          {/* Popular Services */}
           <Card className="shadow-lg">
             <CardHeader className="bg-slate-50 border-b">
-              <CardTitle>Popular Load Sizes</CardTitle>
+              <CardTitle>
+                {user?.service_type === 'junk_removal' && 'Popular Load Sizes'}
+                {user?.service_type === 'lawn_care' && 'Most Popular Services'}
+                {user?.service_type === 'residential_cleaning' && 'Popular Cleaning Types'}
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <ResponsiveContainer width="100%" height={300}>
@@ -348,10 +376,14 @@ export default function Analytics() {
             </CardContent>
           </Card>
 
-          {/* Debris Types */}
+          {/* Secondary Analysis */}
           <Card className="shadow-lg">
             <CardHeader className="bg-slate-50 border-b">
-              <CardTitle>Debris Type Distribution</CardTitle>
+              <CardTitle>
+                {user?.service_type === 'junk_removal' && 'Debris Type Distribution'}
+                {user?.service_type === 'lawn_care' && 'Service Frequency'}
+                {user?.service_type === 'residential_cleaning' && 'Cleaning Frequency'}
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <ResponsiveContainer width="100%" height={300}>
@@ -446,7 +478,11 @@ export default function Analytics() {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Top Load Size</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">
+                  {user?.service_type === 'junk_removal' && 'Top Load Size'}
+                  {user?.service_type === 'lawn_care' && 'Top Services'}
+                  {user?.service_type === 'residential_cleaning' && 'Top Cleaning Types'}
+                </h4>
                 {loadSizeChart.sort((a, b) => b.revenue - a.revenue).slice(0, 3).map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center mb-2">
                     <span className="text-sm text-slate-600">{item.name}</span>
