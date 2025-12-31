@@ -128,22 +128,22 @@ export default function Expenses() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <TrendingDown className="w-8 h-8" />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+              <TrendingDown className="w-6 h-6 md:w-8 md:h-8" />
               Expense Tracking
             </h1>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={() => setShowScanner(true)}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
               >
                 <Camera className="w-4 h-4 mr-2" />
                 Scan Receipt
               </Button>
               <Button
                 onClick={() => setShowForm(!showForm)}
-                className="bg-red-500 hover:bg-red-600"
+                className="bg-red-500 hover:bg-red-600 w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Expense

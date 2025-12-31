@@ -154,10 +154,10 @@ export default function TeamManagement() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <Users className="w-8 h-8" />
+              <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                <Users className="w-6 h-6 md:w-8 md:h-8" />
                 Team Management
               </h1>
               <p className="text-slate-400 mt-1">{activeMembers.length} active team members</p>
@@ -179,7 +179,7 @@ export default function TeamManagement() {
                 });
                 setShowForm(!showForm);
               }}
-              className="bg-blue-500 hover:bg-blue-600"
+              className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Team Member
