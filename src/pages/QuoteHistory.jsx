@@ -68,6 +68,26 @@ export default function QuoteHistory() {
     window.location.href = `/ScheduleJob?quoteId=${quoteId}`;
   };
 
+  const handleSendPaymentLink = async (quote) => {
+    const paymentUrl = `${window.location.origin}/PaymentPage?quoteId=${quote.id}`;
+    
+    if (quote.customer_email) {
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: quote.customer_email,
+          subject: `Payment Request - Quote #${quote.quote_number}`,
+          body: `Hi ${quote.customer_name},\n\nYour quote is ready! Please complete payment using this link:\n\n${paymentUrl}\n\nTotal Amount: $${quote.total?.toFixed(2)}\n\nThank you!`
+        });
+        alert('Payment link sent via email!');
+      } catch (err) {
+        alert('Error sending email');
+      }
+    } else {
+      navigator.clipboard.writeText(paymentUrl);
+      alert('Payment link copied to clipboard!');
+    }
+  };
+
   const statusColors = {
     draft: 'bg-slate-100 text-slate-700',
     sent: 'bg-blue-100 text-blue-700',
@@ -185,6 +205,15 @@ export default function QuoteHistory() {
                         <Download className="w-4 h-4 mr-2" />
                         PDF
                       </Button>
+                      {quote.payment_status === 'unpaid' && (
+                        <Button
+                          onClick={() => handleSendPaymentLink(quote)}
+                          variant="outline"
+                          className="border-green-500 text-green-600 hover:bg-green-50"
+                        >
+                          💳 Payment
+                        </Button>
+                      )}
                       {quote.status === 'accepted' && !quote.job_id && (
                         <Button
                           onClick={() => handleScheduleJob(quote.id)}

@@ -32,10 +32,12 @@ export default function CreateQuote() {
     customer_address: '',
     customer_phone: '',
     customer_email: '',
-    load_count: 1,
+    load_size: 'half_load',
+    debris_type: 'household_items',
     items_description: '',
     base_price: '',
     fees: [],
+    taxes: '',
     notes: '',
     signature_url: ''
   });
@@ -84,7 +86,8 @@ export default function CreateQuote() {
     const feesTotal = formData.fees.reduce((sum, fee) => {
       return sum + (parseFloat(fee.amount) || 0);
     }, 0);
-    return base + feesTotal;
+    const taxes = parseFloat(formData.taxes) || 0;
+    return base + feesTotal + taxes;
   };
 
   const generateQuoteNumber = () => {
@@ -277,17 +280,45 @@ Reply to accept this quote!`;
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div>
-                <Label>Number of Loads *</Label>
-                <div className="flex gap-2 mt-2">
-                  {[1, 2, 3].map((num) => (
+                <Label>Load Size *</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                  {[
+                    { value: 'minimum_pickup', label: 'Minimum Pickup' },
+                    { value: 'quarter_load', label: '1/4 Load' },
+                    { value: 'half_load', label: '1/2 Load' },
+                    { value: 'three_quarter_load', label: '3/4 Load' },
+                    { value: 'full_load', label: 'Full Load' }
+                  ].map((option) => (
                     <Button
-                      key={num}
+                      key={option.value}
                       type="button"
-                      variant={formData.load_count === num ? 'default' : 'outline'}
-                      onClick={() => setFormData({ ...formData, load_count: num })}
-                      className={formData.load_count === num ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+                      variant={formData.load_size === option.value ? 'default' : 'outline'}
+                      onClick={() => setFormData({ ...formData, load_size: option.value })}
+                      className={formData.load_size === option.value ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
                     >
-                      {num} {num === 1 ? 'Load' : 'Loads'}
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label>Type of Debris *</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {[
+                    { value: 'household_items', label: 'Household Items' },
+                    { value: 'construction_debris', label: 'Construction Debris' },
+                    { value: 'outdoor_debris', label: 'Outdoor Debris' },
+                    { value: 'mixed_trash', label: 'Mixed Trash' }
+                  ].map((option) => (
+                    <Button
+                      key={option.value}
+                      type="button"
+                      variant={formData.debris_type === option.value ? 'default' : 'outline'}
+                      onClick={() => setFormData({ ...formData, debris_type: option.value })}
+                      className={formData.debris_type === option.value ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+                    >
+                      {option.label}
                     </Button>
                   ))}
                 </div>
@@ -373,14 +404,43 @@ Reply to accept this quote!`;
                 </div>
               </div>
 
+              <div>
+                <Label>Taxes</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                  <Input
+                    type="number"
+                    value={formData.taxes}
+                    onChange={(e) => setFormData({ ...formData, taxes: e.target.value })}
+                    placeholder="0.00"
+                    className="pl-7"
+                  />
+                </div>
+              </div>
+
               <div className="pt-4 border-t">
+                <div className="space-y-2 text-sm mb-3">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>${(parseFloat(formData.base_price) || 0).toFixed(2)}</span>
+                  </div>
+                  {formData.fees.length > 0 && (
+                    <div className="flex justify-between">
+                      <span>Fees:</span>
+                      <span>${formData.fees.reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {parseFloat(formData.taxes) > 0 && (
+                    <div className="flex justify-between">
+                      <span>Taxes:</span>
+                      <span>${parseFloat(formData.taxes).toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between items-center text-2xl font-bold">
                   <span>Total:</span>
                   <span className="text-emerald-600">${total.toFixed(2)}</span>
                 </div>
-                <p className="text-sm text-slate-500 mt-2 text-right">
-                  Customer sees: "All fees included"
-                </p>
               </div>
             </CardContent>
           </Card>
