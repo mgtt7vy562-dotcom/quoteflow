@@ -9,15 +9,12 @@ export default function LicenseEntry() {
   const [licenseKey, setLicenseKey] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [activeTab, setActiveTab] = useState('license'); // 'license' or 'subscription'
 
   useEffect(() => {
-    checkExistingAccess();
-    
     // PWA Install prompt
     const handler = (e) => {
       e.preventDefault();
@@ -29,20 +26,6 @@ export default function LicenseEntry() {
     
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
-
-  const checkExistingAccess = async () => {
-    try {
-      const user = await base44.auth.me();
-      if (user.license_validated) {
-        window.location.href = '/Dashboard';
-        return;
-      }
-    } catch (err) {
-      // Not logged in yet
-    }
-    
-    setChecking(false);
-  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -85,14 +68,6 @@ export default function LicenseEntry() {
       setLoading(false);
     }
   };
-
-  if (checking) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
