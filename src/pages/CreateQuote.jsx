@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { createPageUrl } from './utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,12 +41,12 @@ export default function CreateQuote() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = createPageUrl('LicenseEntry');
+        window.location.href = '/LicenseEntry';
         return;
       }
       setUser(currentUser);
     } catch (err) {
-      window.location.href = createPageUrl('LicenseEntry');
+      window.location.href = '/LicenseEntry';
     } finally {
       setLoading(false);
     }
@@ -113,7 +112,7 @@ export default function CreateQuote() {
 
       // Redirect to history
       setTimeout(() => {
-        window.location.href = createPageUrl('QuoteHistory');
+        window.location.href = '/QuoteHistory';
       }, 500);
     } catch (err) {
       alert('Error saving quote');
@@ -136,7 +135,7 @@ export default function CreateQuote() {
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-4xl mx-auto">
-          <a href={createPageUrl('Dashboard')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <a href="/Dashboard" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>

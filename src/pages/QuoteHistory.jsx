@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { createPageUrl } from './utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +42,7 @@ export default function QuoteHistory() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = createPageUrl('LicenseEntry');
+        window.location.href = '/LicenseEntry';
         return;
       }
       setUser(currentUser);
@@ -52,7 +51,7 @@ export default function QuoteHistory() {
       setQuotes(allQuotes);
       setFilteredQuotes(allQuotes);
     } catch (err) {
-      window.location.href = createPageUrl('LicenseEntry');
+      window.location.href = '/LicenseEntry';
     } finally {
       setLoading(false);
     }
@@ -85,7 +84,7 @@ export default function QuoteHistory() {
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-6xl mx-auto">
-          <a href={createPageUrl('Dashboard')} className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
+          <a href="/Dashboard" className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>

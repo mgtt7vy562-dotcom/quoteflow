@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from './utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { 
@@ -27,7 +26,7 @@ export default function Dashboard() {
     try {
       const currentUser = await base44.auth.me();
       if (!currentUser.license_validated) {
-        window.location.href = createPageUrl('LicenseEntry');
+        window.location.href = '/LicenseEntry';
         return;
       }
       setUser(currentUser);
@@ -35,7 +34,7 @@ export default function Dashboard() {
       const allQuotes = await base44.entities.Quote.list('-created_date', 50);
       setQuotes(allQuotes);
     } catch (err) {
-      window.location.href = createPageUrl('LicenseEntry');
+      window.location.href = '/LicenseEntry';
     } finally {
       setLoading(false);
     }
@@ -73,7 +72,7 @@ export default function Dashboard() {
                 {user?.email}
               </p>
             </div>
-            <Link to={createPageUrl('Settings')}>
+            <Link to="/Settings">
               <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
@@ -126,7 +125,7 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto p-4 md:p-8">
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <Link to={createPageUrl('CreateQuote')}>
+          <Link to="/CreateQuote">
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-emerald-500 bg-gradient-to-br from-emerald-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -142,7 +141,7 @@ export default function Dashboard() {
             </Card>
           </Link>
 
-          <Link to={createPageUrl('QuoteHistory')}>
+          <Link to="/QuoteHistory">
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-500 bg-gradient-to-br from-blue-50 to-white">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -173,7 +172,7 @@ export default function Dashboard() {
                 <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                 <p className="text-slate-600 text-lg font-medium mb-2">No quotes yet</p>
                 <p className="text-slate-500 mb-6">Create your first quote to get started</p>
-                <Link to={createPageUrl('CreateQuote')}>
+                <Link to="/CreateQuote">
                   <Button className="bg-emerald-500 hover:bg-emerald-600">
                     <Plus className="w-4 h-4 mr-2" />
                     Create Quote
@@ -183,7 +182,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {quotes.slice(0, 5).map((quote) => (
-                  <Link key={quote.id} to={createPageUrl(`QuoteHistory`)}>
+                  <Link key={quote.id} to="/QuoteHistory">
                     <div className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200">
                       <div>
                         <p className="font-semibold text-slate-900">{quote.customer_name}</p>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from './utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -23,7 +22,7 @@ export default function LicenseEntry() {
     try {
       const user = await base44.auth.me();
       if (user.license_validated) {
-        window.location.href = createPageUrl('Dashboard');
+        window.location.href = '/Dashboard';
       }
     } catch (err) {
       // User not logged in or no license
@@ -66,7 +65,7 @@ export default function LicenseEntry() {
         license_validated: true
       });
 
-      window.location.href = createPageUrl('Dashboard');
+      window.location.href = '/Dashboard';
     } catch (err) {
       setError('Something went wrong. Please try again.');
       setLoading(false);
