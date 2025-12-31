@@ -17,8 +17,8 @@ import {
   Receipt,
   Send
 } from 'lucide-react';
-import EmailBroadcast from '../components/admin/EmailBroadcast';
-import SalesTaxCalculator from '../components/admin/SalesTaxCalculator';
+import EmailBroadcast from '../components/admin/EmailBroadcast.jsx';
+import SalesTaxCalculator from '../components/admin/SalesTaxCalculator.jsx';
 
 export default function Admin() {
   const [user, setUser] = useState(null);
