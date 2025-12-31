@@ -54,14 +54,14 @@ Deno.serve(async (req) => {
       const description = event.description || '';
       const location = event.location || '';
       
-      // Parse the time properly
+      // Convert UTC time to Central Time for display
       const startDateTime = new Date(event.start.dateTime);
-      const timeString = startDateTime.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
+      const timeString = new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
         hour12: true,
         timeZone: 'America/Chicago'
-      });
+      }).format(startDateTime);
       
       // Create job from calendar event
       await base44.entities.Job.create({
