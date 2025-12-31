@@ -500,7 +500,24 @@ export default function Dashboard() {
                   <Link key={quote.id} to="/QuoteHistory">
                     <div className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-transparent hover:border-slate-200">
                       <div className="flex-1">
-                        <p className="font-semibold text-slate-900">{quote.customer_name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-slate-900">{quote.customer_name}</p>
+                          {quote.service_type === 'junk_removal' && (
+                            <span className="inline-flex items-center text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                              🗑️ Junk Removal
+                            </span>
+                          )}
+                          {quote.service_type === 'lawn_care' && (
+                            <span className="inline-flex items-center text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                              🌱 Lawn Care
+                            </span>
+                          )}
+                          {quote.service_type === 'residential_cleaning' && (
+                            <span className="inline-flex items-center text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                              ✨ Cleaning
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-slate-600">{quote.quote_number}</p>
                         <div className="mt-1">
                           {quote.payment_status === 'paid' ? (
