@@ -12,7 +12,8 @@ import {
   DollarSign,
   Calendar,
   Loader2,
-  Send
+  Send,
+  Download
 } from 'lucide-react';
 
 export default function Customers() {
@@ -79,6 +80,36 @@ ${user.phone || ''}`
     }
   };
 
+  const handleExportCustomers = () => {
+    const csvData = [
+      ['Customer Database Export'],
+      [`Export Date: ${new Date().toLocaleDateString()}`],
+      [''],
+      ['Name', 'Email', 'Phone', 'Address', 'Source', 'Total Jobs', 'Total Revenue', 'Last Job Date', 'Notes'],
+      ...customers.map(c => [
+        c.name || '',
+        c.email || '',
+        c.phone || '',
+        c.address || '',
+        c.source || '',
+        c.total_jobs || 0,
+        c.total_revenue || 0,
+        c.last_job_date || '',
+        c.notes || ''
+      ])
+    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `customers-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  };
+
   const filteredCustomers = customers.filter(c =>
     c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -101,8 +132,19 @@ ${user.phone || ''}`
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <h1 className="text-3xl font-bold">Customer Database</h1>
-          <p className="text-slate-400 mt-1">{customers.length} customers</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Customer Database</h1>
+              <p className="text-slate-400 mt-1">{customers.length} customers</p>
+            </div>
+            <Button
+              onClick={handleExportCustomers}
+              className="bg-emerald-500 hover:bg-emerald-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
       </div>
 
