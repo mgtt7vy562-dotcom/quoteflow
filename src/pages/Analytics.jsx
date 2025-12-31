@@ -8,7 +8,8 @@ import {
   Calendar,
   Target,
   Loader2,
-  Download
+  Download,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -86,6 +87,60 @@ export default function Analytics() {
 
   const monthlyData = getMonthlyData();
 
+  const emailMonthlyReport = async (month) => {
+    if (!user?.email) {
+      alert('No email configured');
+      return;
+    }
+
+    const selectedMonth = month || currentMonth;
+    const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    const monthJobs = jobs.filter(j => {
+      const date = new Date(j.scheduled_date);
+      return date.toISOString().slice(0, 7) === selectedMonth;
+    });
+    
+    const monthExpenses = expenses.filter(e => e.date?.startsWith(selectedMonth));
+    
+    const revenue = monthJobs.reduce((sum, j) => sum + (j.total_price || 0), 0);
+    const totalExpenses = monthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const profit = revenue - totalExpenses;
+
+    const emailBody = `
+📊 Monthly Business Report - ${monthName}
+
+SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 Total Revenue: $${revenue.toLocaleString()}
+💸 Total Expenses: $${totalExpenses.toLocaleString()}
+✅ Net Profit: $${profit.toLocaleString()}
+📋 Jobs Completed: ${monthJobs.length}
+📈 Average Job Value: $${monthJobs.length > 0 ? (revenue / monthJobs.length).toFixed(0) : '0'}
+
+COMPLETED JOBS (${monthJobs.length})
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+${monthJobs.map(j => `• ${new Date(j.scheduled_date).toLocaleDateString()} - ${j.customer_name} - $${j.total_price?.toLocaleString()}`).join('\n')}
+
+EXPENSES (${monthExpenses.length})
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+${monthExpenses.map(e => `• ${new Date(e.date).toLocaleDateString()} - ${e.category} - $${e.amount?.toLocaleString()}`).join('\n')}
+
+Keep up the great work! 🚀
+    `.trim();
+
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: user.email,
+        subject: `📊 Monthly Report - ${monthName}`,
+        body: emailBody
+      });
+      alert('Monthly report sent to your email!');
+    } catch (err) {
+      alert('Error sending email');
+    }
+  };
+
   const exportMonthlyReport = (month) => {
     const selectedMonth = month || currentMonth;
     const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -155,13 +210,23 @@ export default function Analytics() {
               <TrendingUp className="w-8 h-8" />
               Revenue Analytics
             </h1>
-            <Button
-              onClick={() => exportMonthlyReport(currentMonth)}
-              className="bg-emerald-500 hover:bg-emerald-600"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export This Month
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => emailMonthlyReport(currentMonth)}
+                variant="outline"
+                className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Email Report
+              </Button>
+              <Button
+                onClick={() => exportMonthlyReport(currentMonth)}
+                className="bg-emerald-500 hover:bg-emerald-600"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </div>
         </div>
       </div>

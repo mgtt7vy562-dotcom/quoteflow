@@ -68,6 +68,43 @@ export default function Calendar() {
     });
   };
 
+  const sendJobReminder = async (job) => {
+    if (!job.customer_phone && !job.customer_email) {
+      alert('No contact info for this customer');
+      return;
+    }
+
+    const jobDate = new Date(job.scheduled_date).toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    const message = `Hi ${job.customer_name}! 
+
+Reminder: Your junk removal appointment with ${user?.company_name || 'us'} is scheduled for ${jobDate} at ${job.scheduled_time}.
+
+Address: ${job.customer_address}
+Items: ${job.items_description}
+
+We'll see you then! Reply if you need to reschedule.`;
+
+    try {
+      if (job.customer_email) {
+        await base44.integrations.Core.SendEmail({
+          to: job.customer_email,
+          subject: `Reminder: Junk Removal Appointment on ${jobDate}`,
+          body: message
+        });
+        alert('Reminder sent via email!');
+      } else {
+        alert(`SMS ready! Send this to ${job.customer_phone}:\n\n${message}`);
+      }
+    } catch (err) {
+      alert('Error sending reminder');
+    }
+  };
+
   const previousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
   };
