@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -33,6 +34,7 @@ export default function JobDetails() {
   const [completionPhotos, setCompletionPhotos] = useState([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [sendingPhotos, setSendingPhotos] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
 
   useEffect(() => {
     loadData();
@@ -55,6 +57,7 @@ export default function JobDetails() {
         if (jobs.length > 0) {
           setJob(jobs[0]);
           setCompletionNotes(jobs[0].completion_notes || '');
+          setPaymentMethod(jobs[0].payment_method || '');
         }
       }
     } catch (err) {
@@ -210,6 +213,19 @@ Completed: ${new Date().toLocaleDateString()}`
 
   const generateInvoice = () => {
     InvoicePDFGenerator.createInvoice(job, user);
+  };
+
+  const handlePaymentUpdate = async (method, status) => {
+    try {
+      await base44.entities.Job.update(job.id, {
+        payment_method: method,
+        payment_status: status
+      });
+      setJob({ ...job, payment_method: method, payment_status: status });
+      setPaymentMethod(method);
+    } catch (err) {
+      alert('Error updating payment');
+    }
   };
 
   const statusColors = {
@@ -456,6 +472,50 @@ Completed: ${new Date().toLocaleDateString()}`
                 <p className="text-4xl font-bold text-emerald-600">
                   ${job.total_price?.toLocaleString()}
                 </p>
+                
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <Label className="text-sm mb-2 block">Payment Status</Label>
+                    <div className={`p-3 rounded-lg text-center font-semibold ${
+                      job.payment_status === 'paid' 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {job.payment_status === 'paid' ? '✓ PAID' : 'UNPAID'}
+                    </div>
+                  </div>
+
+                  {job.payment_status !== 'paid' && job.status === 'completed' && (
+                    <div>
+                      <Label className="text-sm mb-2 block">Mark as Paid via:</Label>
+                      <Select
+                        value={paymentMethod}
+                        onValueChange={(method) => handlePaymentUpdate(method, 'paid')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment method" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">💵 Cash</SelectItem>
+                          <SelectItem value="check">📝 Check</SelectItem>
+                          <SelectItem value="zelle">Zelle</SelectItem>
+                          <SelectItem value="cashapp">Cash App</SelectItem>
+                          <SelectItem value="venmo">Venmo</SelectItem>
+                          <SelectItem value="paypal">PayPal</SelectItem>
+                          <SelectItem value="stripe">Stripe</SelectItem>
+                          <SelectItem value="other_pos">Other POS</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {job.payment_method && (
+                    <div className="text-sm text-slate-600 text-center">
+                      Paid via: <span className="font-semibold capitalize">{job.payment_method.replace('_', ' ')}</span>
+                    </div>
+                  )}
+                </div>
+
                 {job.status === 'completed' && (
                   <Button
                     onClick={generateInvoice}

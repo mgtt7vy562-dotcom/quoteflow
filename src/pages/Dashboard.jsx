@@ -166,7 +166,7 @@ export default function Dashboard() {
                 {user?.company_name || 'Quote Generator'}
                 {user?.service_type && (
                   <span className="text-lg font-normal px-3 py-1 bg-white/20 rounded-full">
-                    {user.service_type === 'junk_removal' && '🗑️ Junk Removal'}
+                    {user.service_type === 'junk_removal' && '🚛 Junk Removal'}
                     {user.service_type === 'lawn_care' && '🌱 Lawn Care'}
                     {user.service_type === 'residential_cleaning' && '✨ Cleaning'}
                   </span>
@@ -559,7 +559,7 @@ export default function Dashboard() {
                           <p className="font-semibold text-slate-900">{quote.customer_name}</p>
                           {quote.service_type === 'junk_removal' && (
                             <span className="inline-flex items-center text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
-                              🗑️ Junk Removal
+                              🚛 Junk Removal
                             </span>
                           )}
                           {quote.service_type === 'lawn_care' && (
