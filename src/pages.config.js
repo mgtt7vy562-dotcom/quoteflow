@@ -15,6 +15,7 @@ import ScheduleJob from './pages/ScheduleJob';
 import ServiceSelection from './pages/ServiceSelection';
 import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
+import TaxRateSetup from './pages/TaxRateSetup';
 
 
 export const PAGES = {
@@ -35,6 +36,7 @@ export const PAGES = {
     "ServiceSelection": ServiceSelection,
     "Settings": Settings,
     "TeamManagement": TeamManagement,
+    "TaxRateSetup": TaxRateSetup,
 }
 
 export const pagesConfig = {

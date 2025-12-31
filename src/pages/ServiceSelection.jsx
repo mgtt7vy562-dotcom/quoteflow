@@ -33,7 +33,7 @@ export default function ServiceSelection() {
     setSaving(true);
     try {
       await base44.auth.updateMe({ service_type: serviceType });
-      window.location.href = '/Dashboard';
+      window.location.href = '/TaxRateSetup';
     } catch (err) {
       alert('Error saving service type');
       setSaving(false);

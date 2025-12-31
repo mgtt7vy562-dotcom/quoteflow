@@ -641,20 +641,20 @@ Provide realistic pricing for a professional residential cleaning service.`;
               </div>
 
               <div>
-                <Label>Tax Rate (%)</Label>
+                <Label>Tax Rate (%) - Optional</Label>
                 <div className="relative mt-1">
                   <Input
                     type="number"
                     step="0.1"
                     value={formData.tax_rate}
                     onChange={(e) => setFormData({ ...formData, tax_rate: e.target.value })}
-                    placeholder="7.5"
+                    placeholder="0"
                     className="pr-8"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">%</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Set your default rate in Settings
+                  Leave at 0 for flat rate pricing. Set your default in Settings.
                 </p>
               </div>
 
