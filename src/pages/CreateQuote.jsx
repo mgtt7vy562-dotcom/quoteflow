@@ -279,12 +279,13 @@ Job Description: "${formData.items_description}"
 
 Based on this, estimate:
 1. Load Size: Choose from minimum_pickup (few small items), quarter_load (1-2 large items), half_load (couch + misc), three_quarter_load (room full), full_load (entire house/garage), other
-2. Debris Type: Choose from household_items, construction_debris, outdoor_debris, mixed_trash, other
+2. Debris Type: AUTO-CATEGORIZE into household_items, construction_debris, outdoor_debris, mixed_trash, or other based on the items mentioned
 3. Estimated Labor Hours: How many hours will this take? (0.5 to 8)
 4. Truck Trips: How many truck trips needed? (1 to 5)
 5. Base Price: Estimate fair market price based on: $75 minimum, +$50 per quarter load, +$25-50 per extra labor hour
 6. Additional Fees: List any extra fees needed (stairs $25-50, heavy items $30-75, long carry $20-40, tight access $25, hazmat extra)
-7. Notes: Brief explanation of pricing and any considerations
+7. Upsell Opportunities: Suggest 2-3 additional services they might need (e.g., dumpster rental, recurring service, yard cleanup)
+8. Notes: Brief explanation of pricing and any considerations
 
 Provide realistic pricing for a professional junk removal service.`,
         response_json_schema: {
@@ -305,10 +306,18 @@ Provide realistic pricing for a professional junk removal service.`,
                 }
               }
             },
+            upsell_opportunities: {
+              type: "array",
+              items: { type: "string" }
+            },
             notes: { type: "string" }
           }
         }
       });
+
+      const upsellText = response.upsell_opportunities?.length > 0 
+        ? `\n\nUpsell Opportunities:\n${response.upsell_opportunities.map(u => `• ${u}`).join('\n')}`
+        : '';
 
       setFormData({
         ...formData,
@@ -318,10 +327,10 @@ Provide realistic pricing for a professional junk removal service.`,
         fees: response.additional_fees || [],
         notes: formData.notes + (formData.notes ? '\n\n' : '') + 
           `AI Analysis: ${response.notes}\n` +
-          `Est. Labor: ${response.labor_hours}hrs | Trips: ${response.truck_trips}`
+          `Est. Labor: ${response.labor_hours}hrs | Trips: ${response.truck_trips}${upsellText}`
       });
 
-      alert('AI analysis complete! Review and adjust the estimates as needed.');
+      alert('AI analysis complete with upsell recommendations! Review and adjust as needed.');
     } catch (err) {
       alert('Error analyzing job: ' + err.message);
     } finally {

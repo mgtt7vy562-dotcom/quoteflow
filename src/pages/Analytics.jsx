@@ -16,6 +16,7 @@ import {
   Award
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import AIInsights from '../components/analytics/AIInsights';
 
 export default function Analytics() {
   const [user, setUser] = useState(null);
@@ -418,6 +419,24 @@ export default function Analytics() {
             </Card>
           )}
         </div>
+
+        {/* AI Insights */}
+        <Card className="shadow-lg mb-6 border-2 border-purple-200">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-purple-600" />
+              AI-Powered Business Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <AIInsights 
+              jobs={filteredJobs} 
+              customers={customers} 
+              revenue={totalRevenue}
+              expenses={totalExpenses}
+            />
+          </CardContent>
+        </Card>
 
         {/* Detailed Breakdown */}
         <Card className="shadow-lg">

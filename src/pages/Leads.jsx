@@ -17,6 +17,7 @@ import {
   X,
   Edit
 } from 'lucide-react';
+import AILeadSuggestions from '../components/leads/AILeadSuggestions';
 
 export default function Leads() {
   const [user, setUser] = useState(null);
@@ -296,6 +297,10 @@ export default function Leads() {
                           <p className="text-sm text-slate-500 mb-1">Message:</p>
                           <p className="text-slate-700">{lead.message}</p>
                         </div>
+
+                        {lead.status === 'new' && (
+                          <AILeadSuggestions leadId={lead.id} message={lead.message} />
+                        )}
 
                         {editingLead === lead.id ? (
                           <div className="space-y-2">
