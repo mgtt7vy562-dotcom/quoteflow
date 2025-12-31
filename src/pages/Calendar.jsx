@@ -12,13 +12,15 @@ import {
   MapPin,
   Clock,
   User,
-  Bell
+  Bell,
+  Download
 } from 'lucide-react';
 
 export default function Calendar() {
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
@@ -67,6 +69,19 @@ export default function Calendar() {
       const jobDate = new Date(job.scheduled_date);
       return jobDate.toDateString() === date.toDateString();
     });
+  };
+
+  const handleImportGoogleCalendar = async () => {
+    setImporting(true);
+    try {
+      const response = await base44.functions.invoke('importGoogleCalendar');
+      await loadData();
+      alert(`Successfully imported ${response.data.imported} job(s) from Google Calendar!`);
+    } catch (err) {
+      alert('Error importing from Google Calendar: ' + err.message);
+    } finally {
+      setImporting(false);
+    }
   };
 
   const sendJobReminder = async (job) => {
@@ -145,11 +160,31 @@ We'll see you then! Reply if you need to reschedule.`;
               <CalendarIcon className="w-8 h-8" />
               Job Calendar
             </h1>
-            <a href="/ScheduleJob">
-              <Button className="bg-emerald-500 hover:bg-emerald-600">
-                Schedule New Job
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleImportGoogleCalendar}
+                disabled={importing}
+                variant="outline"
+                className="border-blue-500 text-blue-600 hover:bg-blue-50"
+              >
+                {importing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Import from Google Calendar
+                  </>
+                )}
               </Button>
-            </a>
+              <a href="/ScheduleJob">
+                <Button className="bg-emerald-500 hover:bg-emerald-600">
+                  Schedule New Job
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
       </div>
