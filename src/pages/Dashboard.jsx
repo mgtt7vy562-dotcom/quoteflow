@@ -30,32 +30,21 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      // Check for license params (after login redirect)
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('key');
-      const urlEmail = urlParams.get('email');
+      // Check localStorage for license (public app, no auth needed)
+      const storedKey = localStorage.getItem('license_key');
+      const storedEmail = localStorage.getItem('license_email');
 
-      const currentUser = await base44.auth.me();
-
-      // If we have license params, validate and save them
-      if (urlKey && urlEmail) {
-        await base44.auth.updateMe({
-          license_key: urlKey,
-          license_email: urlEmail,
-          license_validated: true
-        });
-        // Remove params from URL
-        window.history.replaceState({}, '', '/Dashboard');
-        currentUser.license_validated = true;
-      }
-
-      // Check if user has valid access
-      if (!currentUser.license_validated) {
+      if (!storedKey || !storedEmail) {
         window.location.href = '/LicenseEntry';
         return;
       }
 
-      setUser(currentUser);
+      // Set pseudo user from localStorage
+      setUser({
+        email: storedEmail,
+        company_name: 'Quote Generator',
+        license_validated: true
+      });
 
       const allQuotes = await base44.entities.Quote.list('-created_date', 50);
       setQuotes(allQuotes);
