@@ -7,13 +7,16 @@ import {
   DollarSign,
   Calendar,
   Target,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Analytics() {
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +34,9 @@ export default function Analytics() {
 
       const allJobs = await base44.entities.Job.filter({ status: 'completed' });
       setJobs(allJobs);
+
+      const allExpenses = await base44.entities.Expense.list();
+      setExpenses(allExpenses);
     } catch (err) {
       window.location.href = '/LicenseEntry';
     } finally {
@@ -80,6 +86,54 @@ export default function Analytics() {
 
   const monthlyData = getMonthlyData();
 
+  const exportMonthlyReport = (month) => {
+    const selectedMonth = month || currentMonth;
+    const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    // Filter data for selected month
+    const monthJobs = jobs.filter(j => {
+      const date = new Date(j.scheduled_date);
+      return date.toISOString().slice(0, 7) === selectedMonth;
+    });
+    
+    const monthExpenses = expenses.filter(e => e.date?.startsWith(selectedMonth));
+    
+    const revenue = monthJobs.reduce((sum, j) => sum + (j.total_price || 0), 0);
+    const totalExpenses = monthExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const profit = revenue - totalExpenses;
+    
+    // Create CSV content
+    let csv = `Monthly Business Report - ${monthName}\n\n`;
+    
+    csv += `SUMMARY\n`;
+    csv += `Total Revenue,$${revenue.toFixed(2)}\n`;
+    csv += `Total Expenses,$${totalExpenses.toFixed(2)}\n`;
+    csv += `Net Profit,$${profit.toFixed(2)}\n`;
+    csv += `Jobs Completed,${monthJobs.length}\n`;
+    csv += `Average Job Value,$${monthJobs.length > 0 ? (revenue / monthJobs.length).toFixed(2) : '0.00'}\n\n`;
+    
+    csv += `COMPLETED JOBS\n`;
+    csv += `Date,Customer,Load Size,Price\n`;
+    monthJobs.forEach(job => {
+      csv += `${new Date(job.scheduled_date).toLocaleDateString()},${job.customer_name},${job.load_size || 'N/A'},$${(job.total_price || 0).toFixed(2)}\n`;
+    });
+    
+    csv += `\nEXPENSES\n`;
+    csv += `Date,Category,Description,Amount\n`;
+    monthExpenses.forEach(expense => {
+      csv += `${new Date(expense.date).toLocaleDateString()},${expense.category},${expense.description || ''},$${(expense.amount || 0).toFixed(2)}\n`;
+    });
+    
+    // Download CSV
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Business-Report-${selectedMonth}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -96,10 +150,19 @@ export default function Analytics() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </a>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <TrendingUp className="w-8 h-8" />
-            Revenue Analytics
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <TrendingUp className="w-8 h-8" />
+              Revenue Analytics
+            </h1>
+            <Button
+              onClick={() => exportMonthlyReport(currentMonth)}
+              className="bg-emerald-500 hover:bg-emerald-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export This Month
+            </Button>
+          </div>
         </div>
       </div>
 
