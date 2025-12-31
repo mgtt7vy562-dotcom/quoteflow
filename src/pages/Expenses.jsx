@@ -11,7 +11,8 @@ import {
   Trash2, 
   DollarSign,
   Loader2,
-  TrendingDown
+  TrendingDown,
+  Calendar
 } from 'lucide-react';
 
 export default function Expenses() {
@@ -23,6 +24,7 @@ export default function Expenses() {
   const [showFixedExpenses, setShowFixedExpenses] = useState(false);
   const [fixedMonthly, setFixedMonthly] = useState({});
   const [fixedYearly, setFixedYearly] = useState({});
+  const [activeTab, setActiveTab] = useState('monthly'); // 'monthly' or 'yearly'
   
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -107,8 +109,13 @@ export default function Expenses() {
   };
 
   const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentYear = new Date().getFullYear().toString();
+  
   const monthlyExpenses = expenses.filter(e => e.date?.startsWith(currentMonth));
+  const yearlyExpenses = expenses.filter(e => e.date?.startsWith(currentYear));
+  
   const totalVariableMonthly = monthlyExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  const totalVariableYearly = yearlyExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
   
   const totalFixedMonthly = Object.entries(fixedMonthly || {}).reduce((sum, [key, value]) => {
     if (key !== 'custom_label') {
@@ -117,7 +124,15 @@ export default function Expenses() {
     return sum;
   }, 0);
   
+  const totalFixedYearly = Object.entries(fixedYearly || {}).reduce((sum, [key, value]) => {
+    if (key !== 'other_label') {
+      return sum + (parseFloat(value) || 0);
+    }
+    return sum;
+  }, 0);
+  
   const totalMonthly = totalVariableMonthly + totalFixedMonthly;
+  const totalYearly = totalVariableYearly + totalFixedYearly;
   const totalAllTime = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
 
   const categoryLabels = {
@@ -168,7 +183,7 @@ export default function Expenses() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
             <Card className="bg-white/10 backdrop-blur border-white/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -176,7 +191,7 @@ export default function Expenses() {
                     <p className="text-slate-300 text-sm">This Month</p>
                     <p className="text-3xl font-bold mt-1">${totalMonthly.toLocaleString()}</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      ${totalVariableMonthly.toFixed(0)} variable + ${totalFixedMonthly.toFixed(0)} fixed
+                      ${totalVariableMonthly.toFixed(0)} logged + ${totalFixedMonthly.toFixed(0)} fixed
                     </p>
                   </div>
                   <TrendingDown className="w-10 h-10 text-red-400" />
@@ -188,7 +203,22 @@ export default function Expenses() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-300 text-sm">All-Time Expenses</p>
+                    <p className="text-slate-300 text-sm">This Year</p>
+                    <p className="text-3xl font-bold mt-1">${totalYearly.toLocaleString()}</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      ${totalVariableYearly.toFixed(0)} logged + ${totalFixedYearly.toFixed(0)} fixed
+                    </p>
+                  </div>
+                  <Calendar className="w-10 h-10 text-orange-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur border-white/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-300 text-sm">All-Time Logged</p>
                     <p className="text-3xl font-bold mt-1">${totalAllTime.toLocaleString()}</p>
                   </div>
                   <DollarSign className="w-10 h-10 text-red-400" />
@@ -547,12 +577,32 @@ export default function Expenses() {
           </Card>
         )}
 
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <Button
+            onClick={() => setActiveTab('monthly')}
+            variant={activeTab === 'monthly' ? 'default' : 'outline'}
+            className={activeTab === 'monthly' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+          >
+            Monthly Expenses
+          </Button>
+          <Button
+            onClick={() => setActiveTab('yearly')}
+            variant={activeTab === 'yearly' ? 'default' : 'outline'}
+            className={activeTab === 'yearly' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+          >
+            Yearly Expenses
+          </Button>
+        </div>
+
         <Card className="shadow-lg">
           <CardHeader className="border-b bg-slate-50">
-            <CardTitle>Recent Expenses</CardTitle>
+            <CardTitle>
+              {activeTab === 'monthly' ? 'Monthly Expenses' : 'Yearly Expenses'} - {activeTab === 'monthly' ? new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : currentYear}
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            {expenses.length === 0 ? (
+            {(activeTab === 'monthly' ? monthlyExpenses : yearlyExpenses).length === 0 ? (
               <div className="text-center py-12">
                 <TrendingDown className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                 <p className="text-slate-600 text-lg font-medium mb-2">No expenses tracked yet</p>
@@ -560,7 +610,7 @@ export default function Expenses() {
               </div>
             ) : (
               <div className="space-y-3">
-                {expenses.map((expense) => (
+                {(activeTab === 'monthly' ? monthlyExpenses : yearlyExpenses).map((expense) => (
                   <div
                     key={expense.id}
                     className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-200"
