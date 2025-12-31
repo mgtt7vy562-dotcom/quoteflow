@@ -304,17 +304,30 @@ We'll see you then! Reply if you need to reschedule.`;
                           </div>
                         </div>
                       </a>
-                      {job.status === 'scheduled' && (
+                      <div className="flex gap-2">
+                        {job.status === 'scheduled' && (
+                          <Button
+                            onClick={() => sendJobReminder(job)}
+                            variant="outline"
+                            size="sm"
+                            className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                          >
+                            <Bell className="w-4 h-4 mr-1" />
+                            Remind
+                          </Button>
+                        )}
                         <Button
-                          onClick={() => sendJobReminder(job)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            deleteJob(job.id);
+                          }}
                           variant="outline"
                           size="sm"
-                          className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                          className="border-red-500 text-red-600 hover:bg-red-50"
                         >
-                          <Bell className="w-4 h-4 mr-1" />
-                          Remind
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      )}
+                      </div>
                     </div>
                   ))}
               </div>
