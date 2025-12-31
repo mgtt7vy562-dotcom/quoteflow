@@ -29,7 +29,7 @@ export default function Customers() {
   const loadData = async () => {
     try {
       const currentUser = await base44.auth.me();
-      if (!currentUser.license_validated && currentUser.subscription_status !== 'active') {
+      if (!currentUser.license_validated) {
         window.location.href = '/LicenseEntry';
         return;
       }
