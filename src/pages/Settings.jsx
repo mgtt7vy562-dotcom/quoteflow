@@ -27,6 +27,7 @@ export default function Settings() {
     stripe_publishable_key: '',
     stripe_account_id: '',
     google_business_url: '',
+    yelp_business_url: '',
     default_tax_rate: ''
   });
 
@@ -50,6 +51,7 @@ export default function Settings() {
         stripe_publishable_key: currentUser.stripe_publishable_key || '',
         stripe_account_id: currentUser.stripe_account_id || '',
         google_business_url: currentUser.google_business_url || '',
+        yelp_business_url: currentUser.yelp_business_url || '',
         default_tax_rate: currentUser.default_tax_rate || ''
       });
     } catch (err) {
@@ -163,7 +165,20 @@ export default function Settings() {
                   className="mt-1"
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  💡 Used in automated follow-up emails to collect reviews
+                  💡 Auto-sent after job completion
+                </p>
+              </div>
+
+              <div>
+                <Label>Yelp Business Review Link</Label>
+                <Input
+                  value={formData.yelp_business_url}
+                  onChange={(e) => setFormData({ ...formData, yelp_business_url: e.target.value })}
+                  placeholder="https://www.yelp.com/biz/your-business"
+                  className="mt-1"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  💡 Auto-sent after job completion
                 </p>
               </div>
 
