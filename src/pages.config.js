@@ -1,4 +1,3 @@
-import Admin from './pages/Admin';
 import Analytics from './pages/Analytics';
 import Calendar from './pages/Calendar';
 import CreateQuote from './pages/CreateQuote';
@@ -16,10 +15,10 @@ import ServiceSelection from './pages/ServiceSelection';
 import Settings from './pages/Settings';
 import TaxRateSetup from './pages/TaxRateSetup';
 import TeamManagement from './pages/TeamManagement';
+import Admin from './pages/Admin';
 
 
 export const PAGES = {
-    "Admin": Admin,
     "Analytics": Analytics,
     "Calendar": Calendar,
     "CreateQuote": CreateQuote,
@@ -37,6 +36,7 @@ export const PAGES = {
     "Settings": Settings,
     "TaxRateSetup": TaxRateSetup,
     "TeamManagement": TeamManagement,
+    "Admin": Admin,
 }
 
 export const pagesConfig = {
