@@ -30,22 +30,42 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
+      const currentUser = await base44.auth.me();
+      
       // Check for license params (after login redirect)
       const urlParams = new URLSearchParams(window.location.search);
       const urlKey = urlParams.get('key');
       const urlEmail = urlParams.get('email');
 
-      const currentUser = await base44.auth.me();
-
-      // If we have license params, save them to user record
+      // If we have license params, validate and save them
       if (urlKey && urlEmail) {
-        await base44.auth.updateMe({
-          license_key: urlKey,
-          license_email: urlEmail,
-          license_validated: true
-        });
-        window.history.replaceState({}, '', '/Dashboard');
-        currentUser.license_validated = true;
+        try {
+          // Validate license key exists in database and matches email
+          const keys = await base44.entities.LicenseKey.list();
+          const matchingKey = keys.find(k => 
+            k.key === urlKey && 
+            k.is_active && 
+            k.email.toLowerCase() === urlEmail.toLowerCase()
+          );
+          
+          if (matchingKey) {
+            await base44.auth.updateMe({
+              license_key: urlKey,
+              license_email: urlEmail,
+              license_validated: true
+            });
+            window.history.replaceState({}, '', '/Dashboard');
+            currentUser.license_validated = true;
+          } else {
+            // Invalid license
+            window.location.href = '/LicenseEntry';
+            return;
+          }
+        } catch (err) {
+          console.error('License validation error:', err);
+          window.location.href = '/LicenseEntry';
+          return;
+        }
       }
 
       // Check if user has valid license

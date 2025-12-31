@@ -45,40 +45,9 @@ export default function LicenseEntry() {
     setError('');
     setLoading(true);
 
-    try {
-      // Validate license key exists in database
-      const keys = await base44.entities.LicenseKey.list();
-      const matchingKey = keys.find(k => 
-        k.key === licenseKey.trim() && 
-        k.is_active && 
-        k.email.toLowerCase() === email.trim().toLowerCase()
-      );
-      
-      if (!matchingKey) {
-        setError('Invalid license key or email does not match');
-        setLoading(false);
-        return;
-      }
-      
-      // Check if user is already logged in
-      try {
-        const currentUser = await base44.auth.me();
-        // User is logged in - save license to their account
-        await base44.auth.updateMe({
-          license_key: licenseKey.trim(),
-          license_email: email.trim(),
-          license_validated: true
-        });
-        window.location.href = '/Dashboard';
-      } catch (err) {
-        // User not logged in - redirect to login with params
-        const nextUrl = `/Dashboard?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`;
-        base44.auth.redirectToLogin(nextUrl);
-      }
-    } catch (err) {
-      setError('Error validating license. Please try again.');
-      setLoading(false);
-    }
+    // Just redirect to login with license params - validation happens after login
+    const nextUrl = `/Dashboard?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`;
+    base44.auth.redirectToLogin(nextUrl);
   };
 
   return (
