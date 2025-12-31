@@ -158,8 +158,15 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-1">
+              <h1 className="text-3xl font-bold mb-1 flex items-center gap-3">
                 {user?.company_name || 'Quote Generator'}
+                {user?.service_type && (
+                  <span className="text-lg font-normal px-3 py-1 bg-white/20 rounded-full">
+                    {user.service_type === 'junk_removal' && '🗑️ Junk Removal'}
+                    {user.service_type === 'lawn_care' && '🌱 Lawn Care'}
+                    {user.service_type === 'residential_cleaning' && '✨ Cleaning'}
+                  </span>
+                )}
               </h1>
               <p className="text-slate-400">
                 {user?.email}

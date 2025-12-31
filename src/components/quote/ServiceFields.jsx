@@ -62,12 +62,12 @@ export function LawnCareFields({ formData, setFormData }) {
   return (
     <>
       <div>
-        <Label>Property Size (sq ft) *</Label>
+        <Label>Property Size (sq ft)</Label>
         <Input
           type="number"
           value={formData.property_size || ''}
           onChange={(e) => setFormData({ ...formData, property_size: e.target.value })}
-          placeholder="5000"
+          placeholder="5000 (optional)"
           className="mt-2"
         />
       </div>
@@ -149,6 +149,17 @@ export function ResidentialCleaningFields({ formData, setFormData }) {
             className="mt-2"
           />
         </div>
+      </div>
+
+      <div>
+        <Label>Square Footage (optional)</Label>
+        <Input
+          type="number"
+          value={formData.square_footage || ''}
+          onChange={(e) => setFormData({ ...formData, square_footage: e.target.value })}
+          placeholder="1500"
+          className="mt-2"
+        />
       </div>
 
       <div>
