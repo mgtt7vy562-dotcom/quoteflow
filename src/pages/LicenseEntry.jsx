@@ -83,14 +83,22 @@ export default function LicenseEntry() {
         return;
       }
 
-      // Update user with license info
-      await base44.auth.updateMe({
-        email: email,
-        license_key: licenseKey,
-        license_validated: true
-      });
-
-      window.location.href = '/Dashboard';
+      // Check if user is logged in
+      try {
+        const user = await base44.auth.me();
+        // User is logged in, update directly
+        await base44.auth.updateMe({
+          email: email,
+          license_key: licenseKey,
+          license_validated: true
+        });
+        window.location.href = '/Dashboard';
+      } catch (authErr) {
+        // User not logged in, store license and redirect to login
+        localStorage.setItem('pending_license_key', licenseKey);
+        localStorage.setItem('pending_license_email', email);
+        base44.auth.redirectToLogin('/Dashboard');
+      }
     } catch (err) {
       setError('Something went wrong. Please try again.');
       setLoading(false);
