@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Calendar, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ScheduleJob() {
   const [user, setUser] = useState(null);
@@ -21,7 +22,7 @@ export default function ScheduleJob() {
     scheduled_date: '',
     scheduled_time: '',
     items_description: '',
-    load_count: 1,
+    load_size: 'half_load',
     total_price: '',
     notes: ''
   });
@@ -56,7 +57,7 @@ export default function ScheduleJob() {
             scheduled_date: '',
             scheduled_time: '',
             items_description: quote.items_description,
-            load_count: quote.load_count,
+            load_size: quote.load_size || 'half_load',
             total_price: quote.total,
             notes: quote.notes || ''
           });
@@ -200,14 +201,22 @@ export default function ScheduleJob() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Load Count *</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={formData.load_count}
-                    onChange={(e) => setFormData({ ...formData, load_count: parseInt(e.target.value) })}
-                    required
-                  />
+                  <Label>Load Size *</Label>
+                  <Select
+                    value={formData.load_size}
+                    onValueChange={(value) => setFormData({ ...formData, load_size: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select load size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minimum_pickup">Minimum Fee</SelectItem>
+                      <SelectItem value="quarter_load">1/4 Load</SelectItem>
+                      <SelectItem value="half_load">1/2 Load</SelectItem>
+                      <SelectItem value="three_quarter_load">3/4 Load</SelectItem>
+                      <SelectItem value="full_load">Full Load</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Total Price *</Label>
@@ -228,6 +237,7 @@ export default function ScheduleJob() {
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Add any additional fees (extra labor, stairs, etc.) or helpful prep notes for this job..."
                   className="h-20"
                 />
               </div>
