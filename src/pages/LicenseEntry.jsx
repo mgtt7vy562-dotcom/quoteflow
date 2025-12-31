@@ -110,20 +110,8 @@ export default function LicenseEntry() {
         return;
       }
 
-      // Check if user is already logged in
-      try {
-        const currentUser = await base44.auth.me();
-        // User is logged in - activate license directly
-        await base44.auth.updateMe({
-          license_key: licenseKey.trim(),
-          license_validated: true
-        });
-        window.location.href = '/Dashboard';
-        return;
-      } catch (err) {
-        // User not logged in - redirect to login
-        base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`);
-      }
+      // Redirect to login to authenticate
+      base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
       console.error('Error:', err);
       setError('Something went wrong. Please try again.');
