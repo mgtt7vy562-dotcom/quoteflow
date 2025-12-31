@@ -169,7 +169,28 @@ ${user.phone || ''}`
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">{customer.name}</h3>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-xl font-bold text-slate-900">{customer.name}</h3>
+                      {customer.services_used && customer.services_used.length > 0 && (
+                        <div className="flex gap-1">
+                          {customer.services_used.includes('junk_removal') && (
+                            <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full">
+                              🗑️ Junk Removal
+                            </span>
+                          )}
+                          {customer.services_used.includes('lawn_care') && (
+                            <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                              🌱 Lawn Care
+                            </span>
+                          )}
+                          {customer.services_used.includes('residential_cleaning') && (
+                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                              ✨ Cleaning
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       {customer.email && (
                         <div className="flex items-center gap-2 text-slate-600">

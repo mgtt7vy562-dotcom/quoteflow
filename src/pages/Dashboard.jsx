@@ -11,7 +11,8 @@ import {
   Calendar,
   DollarSign,
   Loader2,
-  User
+  User,
+  Users
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -442,6 +443,22 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Customer Portal</h3>
                     <p className="text-slate-600">Manage your account & loyalty rewards</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/TeamManagement">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-teal-500 bg-gradient-to-br from-teal-50 to-white">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/30">
+                    <Users className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Team Management</h3>
+                    <p className="text-slate-600">Manage your team members</p>
                   </div>
                 </div>
               </CardContent>

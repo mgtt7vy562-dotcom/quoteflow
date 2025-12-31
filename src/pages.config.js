@@ -12,8 +12,9 @@ import Leads from './pages/Leads';
 import PaymentPage from './pages/PaymentPage';
 import QuoteHistory from './pages/QuoteHistory';
 import ScheduleJob from './pages/ScheduleJob';
-import Settings from './pages/Settings';
 import ServiceSelection from './pages/ServiceSelection';
+import Settings from './pages/Settings';
+import TeamManagement from './pages/TeamManagement';
 
 
 export const PAGES = {
@@ -31,8 +32,9 @@ export const PAGES = {
     "PaymentPage": PaymentPage,
     "QuoteHistory": QuoteHistory,
     "ScheduleJob": ScheduleJob,
-    "Settings": Settings,
     "ServiceSelection": ServiceSelection,
+    "Settings": Settings,
+    "TeamManagement": TeamManagement,
 }
 
 export const pagesConfig = {

@@ -94,6 +94,14 @@ export default function Expenses() {
     equipment: '🔧 Equipment',
     maintenance: '🛠️ Maintenance',
     labor: '👷 Labor',
+    fertilizer: '🌱 Fertilizer',
+    seeds_plants: '🌿 Seeds/Plants',
+    lawn_equipment: '🚜 Lawn Equipment',
+    cleaning_supplies: '🧴 Cleaning Supplies',
+    cleaning_equipment: '🧹 Cleaning Equipment',
+    marketing: '📣 Marketing',
+    insurance: '🛡️ Insurance',
+    vehicle_maintenance: '🚗 Vehicle Maintenance',
     other: '📋 Other'
   };
 
