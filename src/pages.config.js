@@ -4,13 +4,13 @@ import Calendar from './pages/Calendar';
 import CreateQuote from './pages/CreateQuote';
 import Customers from './pages/Customers';
 import Dashboard from './pages/Dashboard';
+import Expenses from './pages/Expenses';
 import JobDetails from './pages/JobDetails';
 import LicenseEntry from './pages/LicenseEntry';
 import PaymentPage from './pages/PaymentPage';
 import QuoteHistory from './pages/QuoteHistory';
 import ScheduleJob from './pages/ScheduleJob';
 import Settings from './pages/Settings';
-import Expenses from './pages/Expenses';
 
 
 export const PAGES = {
@@ -20,13 +20,13 @@ export const PAGES = {
     "CreateQuote": CreateQuote,
     "Customers": Customers,
     "Dashboard": Dashboard,
+    "Expenses": Expenses,
     "JobDetails": JobDetails,
     "LicenseEntry": LicenseEntry,
     "PaymentPage": PaymentPage,
     "QuoteHistory": QuoteHistory,
     "ScheduleJob": ScheduleJob,
     "Settings": Settings,
-    "Expenses": Expenses,
 }
 
 export const pagesConfig = {

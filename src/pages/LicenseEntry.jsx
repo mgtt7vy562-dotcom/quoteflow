@@ -91,32 +91,8 @@ export default function LicenseEntry() {
     setError('');
     setLoading(true);
 
-    try {
-      // Validate license key exists
-      const keys = await base44.entities.LicenseKey.filter({ 
-        key: licenseKey.trim(),
-        is_active: true 
-      });
-
-      if (keys.length === 0) {
-        setError('Invalid or inactive license key');
-        setLoading(false);
-        return;
-      }
-
-      if (keys[0].email.toLowerCase() !== email.trim().toLowerCase()) {
-        setError('Email does not match license key');
-        setLoading(false);
-        return;
-      }
-
-      // Redirect to login to authenticate
-      base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`);
-    } catch (err) {
-      console.error('Error:', err);
-      setError('Something went wrong. Please try again.');
-      setLoading(false);
-    }
+    // Redirect to login first - validation happens after authentication
+    base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`);
   };
 
   if (checking) {
