@@ -1,18 +1,18 @@
-import LicenseEntry from './pages/LicenseEntry';
-import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
 import CreateQuote from './pages/CreateQuote';
+import Dashboard from './pages/Dashboard';
+import LicenseEntry from './pages/LicenseEntry';
 import QuoteHistory from './pages/QuoteHistory';
 import Settings from './pages/Settings';
-import Admin from './pages/Admin';
 
 
 export const PAGES = {
-    "LicenseEntry": LicenseEntry,
-    "Dashboard": Dashboard,
+    "Admin": Admin,
     "CreateQuote": CreateQuote,
+    "Dashboard": Dashboard,
+    "LicenseEntry": LicenseEntry,
     "QuoteHistory": QuoteHistory,
     "Settings": Settings,
-    "Admin": Admin,
 }
 
 export const pagesConfig = {

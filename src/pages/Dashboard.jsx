@@ -25,25 +25,11 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       const currentUser = await base44.auth.me();
-      
-      // Check for pending license validation
-      const pendingKey = localStorage.getItem('pending_license_key');
-      const pendingEmail = localStorage.getItem('pending_license_email');
-      
-      if (pendingKey && pendingEmail && !currentUser.license_validated) {
-        // Validate the pending license
-        await base44.auth.updateMe({
-          email: pendingEmail,
-          license_key: pendingKey,
-          license_validated: true
-        });
-        localStorage.removeItem('pending_license_key');
-        localStorage.removeItem('pending_license_email');
-        window.location.reload();
-        return;
-      }
-      
-      if (!currentUser.license_validated) {
+
+      // Check if user has valid access (license OR subscription)
+      const hasAccess = currentUser.license_validated || currentUser.subscription_status === 'active';
+
+      if (!hasAccess) {
         window.location.href = '/LicenseEntry';
         return;
       }

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Key, Loader2, FileText, Zap, Download } from 'lucide-react';
+import { Key, Loader2, FileText, Zap, Download, Check } from 'lucide-react';
 
 export default function LicenseEntry() {
   const [licenseKey, setLicenseKey] = useState('');
@@ -14,9 +13,10 @@ export default function LicenseEntry() {
   const [error, setError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [activeTab, setActiveTab] = useState('license'); // 'license' or 'subscription'
 
   useEffect(() => {
-    checkExistingLicense();
+    checkExistingAccess();
     
     // PWA Install prompt
     const handler = (e) => {
@@ -30,55 +30,42 @@ export default function LicenseEntry() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const checkExistingLicense = async () => {
+  const checkExistingAccess = async () => {
     try {
       const user = await base44.auth.me();
       
-      // Check if redirected back with license info in URL
+      // Check if has valid license or active subscription
+      if (user.license_validated || user.subscription_status === 'active') {
+        window.location.href = '/Dashboard';
+        return;
+      }
+      
+      // Check for URL params (coming back from login)
       const urlParams = new URLSearchParams(window.location.search);
       const urlKey = urlParams.get('key');
       const urlEmail = urlParams.get('email');
       
-      if (urlKey && urlEmail && !user.license_validated) {
-        // Validate the license now that user is authenticated
+      if (urlKey && urlEmail) {
+        // Validate license key
         try {
           const keys = await base44.entities.LicenseKey.filter({ 
             key: urlKey,
             is_active: true 
           });
 
-          if (keys.length === 0) {
-            setError('Invalid or inactive license key');
-            setChecking(false);
+          if (keys.length > 0 && keys[0].email.toLowerCase() === urlEmail.toLowerCase()) {
+            await base44.auth.updateMe({
+              license_key: urlKey,
+              license_validated: true
+            });
+            window.location.href = '/Dashboard';
             return;
           }
-
-          const keyData = keys[0];
-          
-          if (keyData.email.toLowerCase() !== urlEmail.toLowerCase()) {
-            setError('Email does not match license key');
-            setChecking(false);
-            return;
-          }
-
-          // Update user with license
-          await base44.auth.updateMe({
-            license_key: urlKey,
-            license_validated: true
-          });
-          
-          window.location.href = '/Dashboard';
-          return;
-        } catch (validationErr) {
-          setError('License validation failed. Please try again.');
-          setChecking(false);
-          return;
+        } catch (err) {
+          console.error('License validation error:', err);
         }
       }
       
-      if (user.license_validated) {
-        window.location.href = '/Dashboard';
-      }
     } catch (err) {
       // User not logged in - show form
     } finally {
@@ -99,17 +86,35 @@ export default function LicenseEntry() {
     setDeferredPrompt(null);
   };
 
-  const handleSubmit = async (e) => {
+  const handleLicenseSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      // First login/authenticate the user
-      base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey)}&email=${encodeURIComponent(email)}`);
+      // Validate license key exists
+      const keys = await base44.entities.LicenseKey.filter({ 
+        key: licenseKey.trim(),
+        is_active: true 
+      });
+
+      if (keys.length === 0) {
+        setError('Invalid or inactive license key');
+        setLoading(false);
+        return;
+      }
+
+      if (keys[0].email.toLowerCase() !== email.trim().toLowerCase()) {
+        setError('Email does not match license key');
+        setLoading(false);
+        return;
+      }
+
+      // License valid - redirect to login
+      base44.auth.redirectToLogin(`/LicenseEntry?key=${encodeURIComponent(licenseKey.trim())}&email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Unable to proceed to login. Please try again.');
+      console.error('Error:', err);
+      setError('Something went wrong. Please try again.');
       setLoading(false);
     }
   };
@@ -157,66 +162,174 @@ export default function LicenseEntry() {
           </div>
         </div>
 
-        {/* License Form */}
-        <Card className="bg-white/5 backdrop-blur border-slate-700 p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                License Key
-              </label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setActiveTab('subscription')}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
+              activeTab === 'subscription'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            Subscribe
+          </button>
+          <button
+            onClick={() => setActiveTab('license')}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
+              activeTab === 'license'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            License Key
+          </button>
+        </div>
+
+        {/* Subscription Tab */}
+        {activeTab === 'subscription' && (
+          <Card className="bg-white/5 backdrop-blur border-slate-700 p-6">
+            <div className="space-y-4">
+              {/* Monthly Plan */}
+              <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Monthly</h3>
+                    <p className="text-sm text-slate-400">Pay as you go</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">$29</p>
+                    <p className="text-sm text-slate-400">/month</p>
+                  </div>
+                </div>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-center text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-emerald-400 mr-2" />
+                    Unlimited quotes
+                  </li>
+                  <li className="flex items-center text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-emerald-400 mr-2" />
+                    Custom branding
+                  </li>
+                  <li className="flex items-center text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-emerald-400 mr-2" />
+                    Cancel anytime
+                  </li>
+                </ul>
+                <Button
+                  onClick={() => window.open('https://gumroad.com/your-monthly-product', '_blank')}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600"
+                >
+                  Subscribe Monthly
+                </Button>
+              </div>
+
+              {/* Yearly Plan */}
+              <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border-2 border-emerald-500 rounded-xl p-5 relative">
+                <div className="absolute -top-3 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  SAVE $49
+                </div>
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Yearly</h3>
+                    <p className="text-sm text-slate-400">Best value</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">$299</p>
+                    <p className="text-sm text-slate-400">/year</p>
+                  </div>
+                </div>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-center text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-emerald-400 mr-2" />
+                    Everything in Monthly
+                  </li>
+                  <li className="flex items-center text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-emerald-400 mr-2" />
+                    2 months free
+                  </li>
+                  <li className="flex items-center text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-emerald-400 mr-2" />
+                    Priority support
+                  </li>
+                </ul>
+                <Button
+                  onClick={() => window.open('https://gumroad.com/your-yearly-product', '_blank')}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600"
+                >
+                  Subscribe Yearly
+                </Button>
+              </div>
+
+              <p className="text-xs text-slate-500 text-center">
+                After purchase, come back and click "I've subscribed" to activate
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {/* License Key Tab */}
+        {activeTab === 'license' && (
+          <Card className="bg-white/5 backdrop-blur border-slate-700 p-6">
+            <form onSubmit={handleLicenseSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  License Key
+                </label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <Input
+                    type="text"
+                    value={licenseKey}
+                    onChange={(e) => setLicenseKey(e.target.value)}
+                    placeholder="XXXX-XXXX-XXXX-XXXX"
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Email (from purchase)
+                </label>
                 <Input
-                  type="text"
-                  value={licenseKey}
-                  onChange={(e) => setLicenseKey(e.target.value)}
-                  placeholder="XXXX-XXXX-XXXX-XXXX"
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
                   required
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Email (from purchase)
-              </label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                <p className="text-sm text-red-400">{error}</p>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-6"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Validating...
-                </>
-              ) : (
-                'Activate License'
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
               )}
-            </Button>
-          </form>
 
-          <p className="text-xs text-slate-500 text-center mt-4">
-            Purchase at gumroad.com if you don't have a license
-          </p>
-        </Card>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-6"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Validating...
+                  </>
+                ) : (
+                  'Activate License'
+                )}
+              </Button>
+            </form>
+
+            <p className="text-xs text-slate-500 text-center mt-4">
+              One-time purchase available at gumroad.com
+            </p>
+          </Card>
+        )}
       </div>
     </div>
   );
