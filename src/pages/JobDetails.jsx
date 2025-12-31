@@ -18,10 +18,12 @@ import {
   Camera,
   DollarSign,
   Send,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import PhotoUploader from '../components/quote/PhotoUploader';
 import AIJobUpsells from '../components/jobs/AIJobUpsells';
+import InvoicePDFGenerator from '../components/invoice/InvoicePDFGenerator';
 
 export default function JobDetails() {
   const [user, setUser] = useState(null);
@@ -205,6 +207,10 @@ Completed: ${new Date().toLocaleDateString()}`
     } catch (err) {
       alert('Error updating photos');
     }
+  };
+
+  const generateInvoice = () => {
+    InvoicePDFGenerator.createInvoice(job, user);
   };
 
   const statusColors = {
@@ -451,6 +457,16 @@ Completed: ${new Date().toLocaleDateString()}`
                 <p className="text-4xl font-bold text-emerald-600">
                   ${job.total_price?.toLocaleString()}
                 </p>
+                {job.status === 'completed' && (
+                  <Button
+                    onClick={generateInvoice}
+                    variant="outline"
+                    className="w-full mt-4"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Download Invoice
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
