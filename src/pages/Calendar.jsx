@@ -273,35 +273,31 @@ We'll see you then! Reply if you need to reschedule.`;
                   .filter(j => j.status !== 'completed' && j.status !== 'cancelled')
                   .slice(0, 5)
                   .map(job => (
-                    <div key={job.id} className="flex items-center gap-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all">
-                      <a href={`/JobDetails?id=${job.id}`} className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <User className="w-4 h-4 text-slate-400" />
-                              <span className="font-semibold">{job.customer_name}</span>
-                              <Badge className={statusColors[job.status]}>{job.status}</Badge>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-slate-600">
-                              <span className="flex items-center gap-1">
-                                <CalendarIcon className="w-4 h-4" />
-                                {new Date(job.scheduled_date).toLocaleDateString()}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {job.scheduled_time}
-                              </span>
-                              {job.customer_address && (
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="w-4 h-4" />
-                                  {job.customer_address}
-                                </span>
-                              )}
-                            </div>
+                    <div key={job.id} className="p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all">
+                      <a href={`/JobDetails?id=${job.id}`}>
+                        <div className="mb-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <User className="w-4 h-4 text-slate-400" />
+                            <span className="font-semibold">{job.customer_name}</span>
+                            <Badge className={statusColors[job.status]}>{job.status}</Badge>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-emerald-600">${job.total_price?.toLocaleString()}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
+                            <span className="flex items-center gap-1">
+                              <CalendarIcon className="w-4 h-4" />
+                              {new Date(job.scheduled_date).toLocaleDateString()}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {job.scheduled_time}
+                            </span>
+                            {job.customer_address && (
+                              <span className="flex items-center gap-1 col-span-full">
+                                <MapPin className="w-4 h-4" />
+                                {job.customer_address}
+                              </span>
+                            )}
                           </div>
+                          <p className="font-bold text-emerald-600 mt-2">${job.total_price?.toLocaleString()}</p>
                         </div>
                       </a>
                       <div className="flex gap-2">
@@ -310,7 +306,7 @@ We'll see you then! Reply if you need to reschedule.`;
                             onClick={() => sendJobReminder(job)}
                             variant="outline"
                             size="sm"
-                            className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                            className="border-blue-500 text-blue-600 hover:bg-blue-50 flex-1"
                           >
                             <Bell className="w-4 h-4 mr-1" />
                             Remind
