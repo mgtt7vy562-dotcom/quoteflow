@@ -96,9 +96,10 @@ export default function Admin() {
         <div className="max-w-6xl mx-auto">
           <button 
             onClick={() => navigate(-1)} 
-            className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors"
+            className="inline-flex items-center text-slate-300 hover:text-white mb-4 transition-colors cursor-pointer min-h-[44px] min-w-[44px] -ml-2 pl-2 pr-4"
+            style={{ touchAction: 'manipulation' }}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
             Back
           </button>
           <h1 className="text-3xl font-bold flex items-center gap-3">
