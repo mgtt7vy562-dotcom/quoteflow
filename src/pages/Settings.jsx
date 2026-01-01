@@ -42,10 +42,6 @@ export default function Settings() {
   const loadUser = async () => {
     try {
       const currentUser = await base44.auth.me();
-      if (!currentUser.license_validated) {
-        navigate(createPageUrl('LicenseEntry'));
-        return;
-      }
       setUser(currentUser);
       setFormData({
         service_type: currentUser.service_type || '',
@@ -60,7 +56,23 @@ export default function Settings() {
         default_tax_rate: currentUser.default_tax_rate || ''
       });
     } catch (err) {
-      navigate(createPageUrl('LicenseEntry'));
+      // Guest mode - show demo settings
+      setUser({ 
+        email: 'guest@demo.com', 
+        full_name: 'Demo User'
+      });
+      setFormData({
+        service_type: 'junk_removal',
+        company_name: 'Demo Company',
+        phone: '(555) 123-4567',
+        address: '123 Main St, Austin, TX',
+        logo_url: '',
+        stripe_publishable_key: '',
+        stripe_account_id: '',
+        google_business_url: '',
+        yelp_business_url: '',
+        default_tax_rate: '8.25'
+      });
     } finally {
       setLoading(false);
     }
