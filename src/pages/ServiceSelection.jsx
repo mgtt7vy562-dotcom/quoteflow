@@ -32,7 +32,15 @@ export default function ServiceSelection() {
   const handleSelectService = async (serviceType) => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({ service_type: serviceType });
+      // Set 30-day free trial when selecting service
+      const trialEndsAt = new Date();
+      trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+      
+      await base44.auth.updateMe({ 
+        service_type: serviceType,
+        subscription_status: 'trial',
+        trial_ends_at: trialEndsAt.toISOString()
+      });
       window.location.href = '/TaxRateSetup';
     } catch (err) {
       alert('Error saving service type');
