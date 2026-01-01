@@ -23,7 +23,8 @@ export default function ServiceSelection() {
         window.location.href = '/Dashboard';
       }
     } catch (err) {
-      window.location.href = '/Landing';
+      // Guest mode - allow access
+      setUser({ email: 'guest@demo.com' });
     } finally {
       setLoading(false);
     }

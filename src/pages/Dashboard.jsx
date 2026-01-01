@@ -32,21 +32,23 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      const currentUser = await base44.auth.me();
-      
-      // Check if service type is selected
-      if (!currentUser.service_type) {
-        window.location.href = createPageUrl('ServiceSelection');
-        return;
+      let currentUser;
+      try {
+        currentUser = await base44.auth.me();
+      } catch (err) {
+        // Not authenticated - use guest mode
+        currentUser = { 
+          email: 'guest@demo.com', 
+          full_name: 'Demo User',
+          company_name: 'Demo Company',
+          service_type: 'junk_removal',
+          role: 'user'
+        };
       }
       
-      // Check subscription status - allow if trial, active, or no status set (new users)
-      const hasAccess = currentUser.subscription_status === 'trial' || 
-                        currentUser.subscription_status === 'active' ||
-                        !currentUser.subscription_status;
-      
-      if (!hasAccess) {
-        window.location.href = createPageUrl('Landing');
+      // Check if service type is selected (skip for guests)
+      if (!currentUser.service_type && currentUser.email !== 'guest@demo.com') {
+        window.location.href = createPageUrl('ServiceSelection');
         return;
       }
 
@@ -67,7 +69,7 @@ export default function Dashboard() {
         setShowGoalInput(true);
       }
     } catch (err) {
-    window.location.href = createPageUrl('Landing');
+      console.error('Error loading data:', err);
     } finally {
       setLoading(false);
     }
