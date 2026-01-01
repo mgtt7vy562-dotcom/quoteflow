@@ -40,9 +40,10 @@ export default function Dashboard() {
         return;
       }
       
-      // Check subscription status
+      // Check subscription status - allow if trial, active, or no status set (new users)
       const hasAccess = currentUser.subscription_status === 'trial' || 
-                        currentUser.subscription_status === 'active';
+                        currentUser.subscription_status === 'active' ||
+                        !currentUser.subscription_status;
       
       if (!hasAccess) {
         window.location.href = createPageUrl('Landing');

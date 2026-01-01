@@ -14,6 +14,19 @@ export default function Landing() {
   const checkAuth = async () => {
     const authed = await base44.auth.isAuthenticated();
     setIsAuthenticated(authed);
+    
+    // If authenticated, check if user needs onboarding
+    if (authed) {
+      try {
+        const user = await base44.auth.me();
+        // If user doesn't have service_type, redirect to onboarding
+        if (!user.service_type) {
+          window.location.href = '/ServiceSelection';
+        }
+      } catch (err) {
+        // User not fully authenticated, stay on landing
+      }
+    }
   };
 
   const handleSignUp = () => {
