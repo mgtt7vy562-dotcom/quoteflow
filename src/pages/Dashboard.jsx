@@ -13,11 +13,16 @@ import {
   DollarSign,
   Loader2,
   User,
-  Users
+  Users,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import SecurityBadge from '../components/security/SecurityBadge';
+import { useSecurity } from '../components/security/SecurityProvider';
 
 export default function Dashboard() {
+  const { showMasked, toggleMasking } = useSecurity();
   const [user, setUser] = useState(null);
   const [quotes, setQuotes] = useState([]);
   const [jobs, setJobs] = useState([]);
@@ -165,7 +170,10 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{user?.company_name || 'Quote Generator'}</h1>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold">{user?.company_name || 'Quote Generator'}</h1>
+                <SecurityBadge />
+              </div>
               <div className="flex items-center gap-3">
                 <p className="text-slate-400">{user?.email}</p>
                 {user?.service_type && (
@@ -177,12 +185,22 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-            <Link to={createPageUrl('Settings')}>
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
+            <div className="flex gap-2">
+              <Button
+                onClick={toggleMasking}
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                {showMasked ? <Eye className="w-4 h-4 mr-2" /> : <EyeOff className="w-4 h-4 mr-2" />}
+                {showMasked ? 'Show Full Details' : 'Mask Data'}
               </Button>
-            </Link>
+              <Link to={createPageUrl('Settings')}>
+                <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Revenue Goal Modal */}
