@@ -16,6 +16,7 @@ import ServiceSelection from './pages/ServiceSelection';
 import Settings from './pages/Settings';
 import TaxRateSetup from './pages/TaxRateSetup';
 import TeamManagement from './pages/TeamManagement';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -42,4 +43,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Admin",
     Pages: PAGES,
+    Layout: __Layout,
 };

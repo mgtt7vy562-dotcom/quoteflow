@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { securityUtils } from '@/utils/security';
+import { securityUtils } from './securityUtils';
 
 const SecurityContext = createContext(null);
 
