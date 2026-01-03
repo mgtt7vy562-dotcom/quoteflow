@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AIInsights from '../components/analytics/AIInsights';
+import ExportWarning from '../components/security/ExportWarning';
 
 export default function Analytics() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function Analytics() {
   const [expenses, setExpenses] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showExportWarning, setShowExportWarning] = useState(false);
   const [dateRange, setDateRange] = useState({
     start: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0]
@@ -182,6 +184,10 @@ export default function Analytics() {
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
   const handleExportCSV = () => {
+    setShowExportWarning(true);
+  };
+
+  const confirmExport = () => {
     const csvData = [
       ['Analytics Report'],
       [`Date Range: ${dateRange.start} to ${dateRange.end}`],
@@ -211,6 +217,7 @@ export default function Analytics() {
     a.click();
     window.URL.revokeObjectURL(url);
     a.remove();
+    setShowExportWarning(false);
   };
 
   if (loading) {
@@ -223,6 +230,12 @@ export default function Analytics() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {showExportWarning && (
+        <ExportWarning
+          onConfirm={confirmExport}
+          onCancel={() => setShowExportWarning(false)}
+        />
+      )}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-7xl mx-auto">
           <button 
