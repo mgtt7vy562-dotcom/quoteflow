@@ -17,6 +17,8 @@ import {
   Send,
   Download
 } from 'lucide-react';
+import MaskedText from '../components/security/MaskedText';
+import ExportWarning from '../components/security/ExportWarning';
 
 export default function Customers() {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ export default function Customers() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sending, setSending] = useState(null);
+  const [showExportWarning, setShowExportWarning] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -84,6 +87,10 @@ ${user.phone || ''}`
   };
 
   const handleExportCustomers = () => {
+    setShowExportWarning(true);
+  };
+
+  const confirmExport = () => {
     const csvData = [
       ['Customer Database Export'],
       [`Export Date: ${new Date().toLocaleDateString()}`],
@@ -111,6 +118,7 @@ ${user.phone || ''}`
     a.click();
     window.URL.revokeObjectURL(url);
     a.remove();
+    setShowExportWarning(false);
   };
 
   const filteredCustomers = customers.filter(c =>
@@ -129,6 +137,12 @@ ${user.phone || ''}`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {showExportWarning && (
+        <ExportWarning
+          onConfirm={confirmExport}
+          onCancel={() => setShowExportWarning(false)}
+        />
+      )}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-6 px-4 shadow-xl">
         <div className="max-w-6xl mx-auto">
           <button 
@@ -201,19 +215,19 @@ ${user.phone || ''}`
                       {customer.email && (
                         <div className="flex items-center gap-2 text-slate-600">
                           <Mail className="w-4 h-4" />
-                          {customer.email}
+                          <MaskedText type="email" value={customer.email} />
                         </div>
                       )}
                       {customer.phone && (
                         <div className="flex items-center gap-2 text-slate-600">
                           <Phone className="w-4 h-4" />
-                          {customer.phone}
+                          <MaskedText type="phone" value={customer.phone} />
                         </div>
                       )}
                       {customer.address && (
                         <div className="flex items-center gap-2 text-slate-600">
                           <MapPin className="w-4 h-4" />
-                          {customer.address}
+                          <MaskedText type="address" value={customer.address} />
                         </div>
                       )}
                       {customer.last_job_date && (
