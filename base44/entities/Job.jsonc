@@ -1,0 +1,131 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "quote_id": {
+      "type": "string",
+      "description": "Reference to original quote"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "junk_removal",
+        "lawn_care",
+        "residential_cleaning"
+      ],
+      "description": "Which service this job is for"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_phone": {
+      "type": "string"
+    },
+    "customer_email": {
+      "type": "string"
+    },
+    "customer_address": {
+      "type": "string"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When job is scheduled"
+    },
+    "scheduled_time": {
+      "type": "string",
+      "description": "Time slot for job"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "paid"
+      ],
+      "default": "unpaid",
+      "description": "Whether customer has paid"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "zelle",
+        "cashapp",
+        "paypal",
+        "venmo",
+        "check",
+        "cash",
+        "other_pos"
+      ],
+      "description": "How customer paid"
+    },
+    "load_size": {
+      "type": "string",
+      "enum": [
+        "minimum_pickup",
+        "quarter_load",
+        "half_load",
+        "three_quarter_load",
+        "full_load",
+        "other"
+      ]
+    },
+    "debris_type": {
+      "type": "string",
+      "enum": [
+        "household_items",
+        "construction_debris",
+        "outdoor_debris",
+        "mixed_trash",
+        "other"
+      ]
+    },
+    "items_description": {
+      "type": "string"
+    },
+    "total_price": {
+      "type": "number"
+    },
+    "before_photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs to before photos"
+    },
+    "after_photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs to after photos"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "completion_notes": {
+      "type": "string",
+      "description": "Notes added after job completion"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of technician/user assigned to this job"
+    }
+  },
+  "required": [
+    "customer_name",
+    "scheduled_date",
+    "total_price",
+    "service_type"
+  ]
+}

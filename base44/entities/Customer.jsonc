@@ -1,0 +1,89 @@
+{
+  "name": "Customer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "total_jobs": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of completed jobs"
+    },
+    "total_revenue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total revenue from this customer"
+    },
+    "last_job_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of last completed job"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "google",
+        "facebook",
+        "yelp",
+        "referral",
+        "website",
+        "repeat",
+        "other"
+      ],
+      "description": "How customer found us"
+    },
+    "loyalty_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Current loyalty points balance"
+    },
+    "loyalty_tier": {
+      "type": "string",
+      "enum": [
+        "bronze",
+        "silver",
+        "gold"
+      ],
+      "default": "bronze",
+      "description": "Current membership tier"
+    },
+    "referrals_made": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of successful referrals"
+    },
+    "referred_by": {
+      "type": "string",
+      "description": "Email of customer who referred them"
+    },
+    "services_used": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "junk_removal",
+          "lawn_care",
+          "residential_cleaning"
+        ]
+      },
+      "default": [],
+      "description": "Which services this customer has used"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

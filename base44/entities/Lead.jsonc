@@ -1,0 +1,43 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "phone": {
+      "type": "string",
+      "description": "Lead's phone number"
+    },
+    "message": {
+      "type": "string",
+      "description": "Initial message from lead"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "quoted",
+        "converted",
+        "lost"
+      ],
+      "default": "new",
+      "description": "Lead status"
+    },
+    "source": {
+      "type": "string",
+      "default": "sms",
+      "description": "How lead came in"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes about lead"
+    },
+    "converted_to_customer_id": {
+      "type": "string",
+      "description": "Customer ID if converted"
+    }
+  },
+  "required": [
+    "phone",
+    "message"
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "name": "Quote",
+  "type": "object",
+  "properties": {
+    "quote_number": {
+      "type": "string",
+      "description": "Auto-generated quote number"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "junk_removal",
+        "lawn_care",
+        "residential_cleaning"
+      ],
+      "description": "Which service this quote is for"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_address": {
+      "type": "string"
+    },
+    "customer_phone": {
+      "type": "string"
+    },
+    "customer_email": {
+      "type": "string"
+    },
+    "load_size": {
+      "type": "string",
+      "enum": [
+        "minimum_pickup",
+        "quarter_load",
+        "half_load",
+        "three_quarter_load",
+        "full_load",
+        "other"
+      ],
+      "description": "Size of junk removal load"
+    },
+    "debris_type": {
+      "type": "string",
+      "enum": [
+        "household_items",
+        "construction_debris",
+        "outdoor_debris",
+        "mixed_trash",
+        "other"
+      ],
+      "description": "Type of debris being removed"
+    },
+    "property_size": {
+      "type": "number",
+      "description": "Property size in sq ft for lawn care"
+    },
+    "service_frequency": {
+      "type": "string",
+      "description": "Frequency for lawn care services"
+    },
+    "bedrooms": {
+      "type": "number",
+      "description": "Number of bedrooms for cleaning"
+    },
+    "bathrooms": {
+      "type": "number",
+      "description": "Number of bathrooms for cleaning"
+    },
+    "square_footage": {
+      "type": "number",
+      "description": "Square footage for cleaning quotes"
+    },
+    "cleaning_type": {
+      "type": "string",
+      "description": "Type of cleaning service"
+    },
+    "cleaning_frequency": {
+      "type": "string",
+      "description": "Frequency for cleaning services"
+    },
+    "items_description": {
+      "type": "string",
+      "description": "Description of work to be done"
+    },
+    "base_price": {
+      "type": "number"
+    },
+    "fees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Additional fees"
+    },
+    "tax_rate": {
+      "type": "number",
+      "description": "Tax rate as percentage (e.g., 7.5 for 7.5%)"
+    },
+    "taxes": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "accepted",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "signature_url": {
+      "type": "string",
+      "description": "Customer signature image"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "paid",
+        "refunded"
+      ],
+      "default": "unpaid"
+    },
+    "payment_intent_id": {
+      "type": "string",
+      "description": "Stripe payment intent ID"
+    },
+    "payment_link": {
+      "type": "string",
+      "description": "Stripe payment link"
+    },
+    "invoice_number": {
+      "type": "string",
+      "description": "Invoice number after conversion"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Linked job ID if scheduled"
+    }
+  },
+  "required": [
+    "customer_name",
+    "service_type",
+    "base_price",
+    "total"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "junk_removal",
+        "lawn_care",
+        "residential_cleaning"
+      ],
+      "description": "Type of service business"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "inactive",
+        "cancelled"
+      ],
+      "default": "inactive",
+      "description": "User's subscription status"
+    },
+    "subscription_plan": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "yearly"
+      ],
+      "description": "monthly ($29) or yearly ($299)"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 14-day trial ends"
+    },
+    "subscription_started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When subscription started"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID"
+    },
+    "stripe_publishable_key": {
+      "type": "string"
+    },
+    "stripe_account_id": {
+      "type": "string"
+    },
+    "monthly_revenue_goal": {
+      "type": "number",
+      "description": "Revenue goal for current month"
+    },
+    "revenue_goal_month": {
+      "type": "string",
+      "description": "Month for which goal is set (YYYY-MM)"
+    },
+    "google_business_url": {
+      "type": "string",
+      "description": "Google Business review link"
+    },
+    "yelp_business_url": {
+      "type": "string",
+      "description": "Yelp Business review link"
+    },
+    "default_tax_rate": {
+      "type": "number",
+      "description": "Default tax rate percentage for quotes"
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,65 @@
+{
+  "name": "TeamMember",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Team member's full name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "driver",
+        "helper",
+        "technician",
+        "cleaner",
+        "landscaper",
+        "manager",
+        "other"
+      ],
+      "description": "Team member role"
+    },
+    "hourly_rate": {
+      "type": "number",
+      "description": "Hourly pay rate"
+    },
+    "hire_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date hired"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "description": "Employment status"
+    },
+    "emergency_contact_name": {
+      "type": "string",
+      "description": "Emergency contact name"
+    },
+    "emergency_contact_phone": {
+      "type": "string",
+      "description": "Emergency contact phone"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about team member"
+    }
+  },
+  "required": [
+    "name",
+    "role"
+  ]
+}

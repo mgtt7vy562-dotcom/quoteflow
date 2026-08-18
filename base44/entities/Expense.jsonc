@@ -1,0 +1,52 @@
+{
+  "name": "Expense",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of expense"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "fuel",
+        "dump_fees",
+        "equipment",
+        "maintenance",
+        "labor",
+        "fertilizer",
+        "seeds_plants",
+        "lawn_equipment",
+        "cleaning_supplies",
+        "cleaning_equipment",
+        "marketing",
+        "insurance",
+        "vehicle_maintenance",
+        "other"
+      ],
+      "description": "Type of expense - covers all service types"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Expense amount"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the expense was for"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Associated job if applicable"
+    },
+    "receipt_url": {
+      "type": "string",
+      "description": "Photo of receipt"
+    }
+  },
+  "required": [
+    "date",
+    "category",
+    "amount"
+  ]
+}
